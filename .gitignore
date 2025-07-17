@@ -1,1 +1,9 @@
-*.DS_Store
+*.wav
+*.mid
+*.mkv
+*.mp4
+*.mp3
+*.mov
+Audio_Files
+legacy
+tests
