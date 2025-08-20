@@ -2,6 +2,7 @@ var allNotes = []; // [{note: 72, start: 1238, dur: 670}]
 var notesByPitchClass = {}; // {"0": {nextNote: 0, notes: [{start: 3748, dur: 500}, ...]}, "1": {nextNote: 0, notes: [{start: 8394, dur: 348}, ...}]}
 var notesByNoteNum = {}; //{"62": {nextNote: 0, notes: [{start: 4672, dur: 902}, ...}], "73": {nextNote: 0, notes: [{start: 7483, dur: 203}, ...}]}
 var minNoteLength = 60;
+var quantiseState = false;
 
 //=================== RESET NOTE OBJECTS ===================//
 
@@ -146,22 +147,19 @@ function playNoteByPitchClass(noteNum) {
         post('NO NOTES WITH PITCH CLASS:', pitchClass, 'AVAILABLE TO PLAY');
         return;
     }
-    // post('\nplayNoteByPitchClass C');
     var pitchClassObj = notesByPitchClass[pitchClass];
-    // post('\npitchClassObj is:', pitchClassObj);
     var currNextNote = pitchClassObj.nextNote % pitchClassObj.notes.length;
-    // post('\ncurrNextNote is:', currNextNote)
-    // post('\nplayNoteByPitchClass D');
-    // post('\npitchClassObj.notes[currNextNote] is:', pitchClassObj.notes[currNextNote])
     var start = pitchClassObj.notes[currNextNote]['start'];
     var dur = pitchClassObj.notes[currNextNote]['dur'];
+    if(quantiseState == true) {
+        var oldDur = dur;
+        dur = nearestMultiple(dur, minNoteLength)
+        post('\nQuantise is set to true so changing dur from', oldDur, 'to', dur)
+    }
     var end = start + dur;
-    // post('\nplayNoteByPitchClass E');
     var returnArr = [noteNum, start, dur, end];
-    // post('\nplayNoteByPitchClass F');
 
     pitchClassObj.nextNote ++
-    // post('\nplayNoteByPitchClass G');
 
     outlet(0, returnArr);
 }
@@ -172,22 +170,17 @@ function playNoteByNoteNum(noteNum) {
         post('NO NOTES WITH NOTE NUM:', noteNum, 'AVAILABLE TO PLAY');
         return;
     }
-    // post('\nplayNoteByPitchClass C');
     var noteNumObj = notesByNoteNum[noteNum];
-    // post('\nnoteNumObj is:', noteNumObj);
     var currNextNote = noteNumObj.nextNote % noteNumObj.notes.length;
-    // post('\ncurrNextNote is:', currNextNote)
-    // post('\nplayNoteByPitchClass D');
-    // post('\nnoteNumObj.notes[currNextNote] is:', noteNumObj.notes[currNextNote])
     var start = noteNumObj.notes[currNextNote]['start'];
     var dur = noteNumObj.notes[currNextNote]['dur'];
+    if(quantiseState == true) {
+        dur = nearestMultiple(dur, minNoteLength)
+    }
     var end = start + dur;
-    // post('\nplayNoteByPitchClass E');
     var returnArr = [noteNum, start, dur, end];
-    // post('\nplayNoteByPitchClass F');
 
     noteNumObj.nextNote ++
-    // post('\nplayNoteByPitchClass G');
 
     outlet(0, returnArr);
 }
@@ -199,4 +192,69 @@ function setMinNoteLength(noteLength) {
     minNoteLength = noteLength;
     post('\nminNoteLength is now:', minNoteLength);
     organiseAllNotes();
+}
+
+function randomiseOrder() {
+    post('\nShuffling notesByNoteNum note order');
+    var noteNumKeys = Object.keys(notesByNoteNum)
+
+    post('\nPRE: first noteNum start is:', notesByNoteNum[noteNumKeys[0]]['notes'][0]['start'])
+
+    for(var i=0; i<noteNumKeys.length; i++) {
+        var key = noteNumKeys[i];
+
+        if(notesByNoteNum[key]['notes']) {
+            notesByNoteNum[key]['notes'] = shuffle(notesByNoteNum[key]['notes']);
+        }
+    }
+
+    post('\POST: first noteNum start is:', notesByNoteNum[noteNumKeys[0]]['notes'][0]['start'])
+
+    post('\nShuffling notesByPitchClass note order');
+    var pitchClassKeys = Object.keys(notesByPitchClass)
+
+    for(var i=0; i<pitchClassKeys.length; i++) {
+        var key = pitchClassKeys[i];
+        if(notesByPitchClass[key]['notes']) {
+            notesByPitchClass[key]['notes'] = shuffle(notesByPitchClass[key]['notes']);
+        }
+    }
+}
+
+function setQuantise(quantState) {
+    var newState = Boolean(quantState);
+    post('\nSetting quantise state to', newState);
+    quantiseState = newState;
+}
+
+//=================== UTILITY FUNCTIONS ===================//
+
+function shuffle(array) {
+    var m = array.length,
+        t,
+        i;
+
+    // While there remain elements to shuffle…
+    while (m) {
+        // Pick a remaining element…
+        i = Math.floor(Math.random() * m--);
+
+        // And swap it with the current element.
+        t = array[m];
+        array[m] = array[i];
+        array[i] = t;
+    }
+
+    return array;
+}
+
+function nearestMultiple (val, mult) {
+    var diff = val % mult;
+
+    if(val < mult) {
+        return mult;
+    }
+
+    var res = diff > (mult/2) ? val + (mult - diff) : val - diff;
+    return res;
 }
