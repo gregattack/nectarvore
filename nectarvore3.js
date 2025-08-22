@@ -196,6 +196,23 @@ function playNoteByNoteNum(noteNum) {
     outlet(0, returnArr);
 }
 
+function playBySingleNote(noteNum) {
+    if(!notesByNoteNum[noteNum]) {
+        post('NO NOTES WITH NOTE NUM:', noteNum, 'AVAILABLE TO PLAY');
+        return;
+    }
+    var noteNumObj = notesByNoteNum[noteNum];
+    var start = noteNumObj.notes[0]['start'];
+    var dur = noteNumObj.notes[0]['dur'];
+    if(quantiseState == true) {
+        dur = nearestMultiple(dur, minNoteLength)
+    }
+    var end = start + dur;
+    var returnArr = [noteNum, start, dur, end];
+
+    outlet(0, returnArr);
+}
+
 
 //=================== EXPORT AUDIO LOGIC ===================//
 
