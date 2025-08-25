@@ -1,4 +1,4 @@
-this.outlets = 2;
+this.outlets = 3; // out1: playNote info (ie play this note at this timestamp). out2 functions for exporting audio. out3 state saving functions
 var allNotes = []; // [{note: 72, start: 1238, dur: 670}]
 var notesByPitchClass = {}; // {"0": {nextNote: 0, notes: [{start: 3748, dur: 500}, ...]}, "1": {nextNote: 0, notes: [{start: 8394, dur: 348}, ...}]}
 var notesByNoteNum = {}; //{"62": {nextNote: 0, notes: [{start: 4672, dur: 902}, ...}], "73": {nextNote: 0, notes: [{start: 7483, dur: 203}, ...}]}
@@ -92,6 +92,7 @@ function storeNoteInfo(note, start, dur) {
  */
 function analysisFinished() {
     organiseAllNotes();
+    saveState();
 }
 
 /**
@@ -258,6 +259,7 @@ function setMinNoteLength(noteLength) {
     minNoteLength = noteLength;
     post('\nminNoteLength is now:', minNoteLength);
     organiseAllNotes();
+    saveState();
 }
 
 function randomiseOrder() {
@@ -285,12 +287,60 @@ function randomiseOrder() {
             notesByPitchClass[key]['notes'] = shuffle(notesByPitchClass[key]['notes']);
         }
     }
+    saveState();
 }
 
 function setQuantise(quantState) {
     var newState = Boolean(quantState);
     post('\nSetting quantise state to', newState);
     quantiseState = newState;
+    saveState();
+}
+
+//=================== STATE SAVING AND RETRIEVAL ===================//
+
+/**
+ * var allNotes = []; // [{note: 72, start: 1238, dur: 670}]
+var notesByPitchClass = {}; // {"0": {nextNote: 0, notes: [{start: 3748, dur: 500}, ...]}, "1": {nextNote: 0, notes: [{start: 8394, dur: 348}, ...}]}
+var notesByNoteNum = {}; //{"62": {nextNote: 0, notes: [{start: 4672, dur: 902}, ...}], "73": {nextNote: 0, notes: [{start: 7483, dur: 203}, ...}]}
+var minNoteLength = 60;
+var quantiseState = false
+ */
+function saveState() {
+    post('saving state')
+
+    var state = {
+        allNotes: allNotes,
+        notesByPitchClass: notesByPitchClass,
+        notesByNoteNum: notesByNoteNum,
+        minNoteLength: minNoteLength,
+        quantiseState: quantiseState
+    }
+
+    outlet(2, JSON.stringify(state))
+}
+
+function recallState(stateStr) {
+    post('\nRecalling State.');
+    if(!stateStr) {
+        post('\nNo previous state found. Starting afresh.');
+        return;
+    }
+
+    try {
+        var state = JSON.parse(stateStr);
+        allNotes = state.allNotes;
+        notesByPitchClass = state.notesByPitchClass;
+        notesByNoteNum = state.notesByNoteNum;
+        minNoteLength = state.minNoteLength;
+        quantiseState = state.quantiseState;
+    } catch(err) {
+        post('\nCould not parse state. Error:', err)
+    }
+}
+
+function queryAllNoteLen() {
+    post('\n Length of allNotes array is', allNotes.length)
 }
 
 //=================== UTILITY FUNCTIONS ===================//
