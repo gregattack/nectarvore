@@ -1,8 +1,9 @@
+this.outlets = 3; // out1: playNote info (ie play this note at this timestamp). out2 functions for exporting audio. out3 state saving functions
 var allNotes = []; // [{note: 72, start: 1238, dur: 670}]
 var notesByPitchClass = {}; // {"0": {nextNote: 0, notes: [{start: 3748, dur: 500}, ...]}, "1": {nextNote: 0, notes: [{start: 8394, dur: 348}, ...}]}
 var notesByNoteNum = {}; //{"62": {nextNote: 0, notes: [{start: 4672, dur: 902}, ...}], "73": {nextNote: 0, notes: [{start: 7483, dur: 203}, ...}]}
 var minNoteLength = 60;
-var quantiseState = false;
+var quantiseState = false; // true/false. Quantise the 'dur' (and therefore also 'end') value output when playing back a note. If true these values will be quantised to the minNoteLength value.
 
 //=================== RESET NOTE OBJECTS ===================//
 
@@ -32,9 +33,19 @@ function resetNotesByNoteNum() {
  * resets the 'nextNote' property of both notesByPitchClass and notesByNoteNum with regard to the desired noteNum.
  * @param {*} noteNum 
  */
-function resetNextNoteCounter(noteNum) {
-    resetNotesByNoteNumNextNoteCounter(noteNum);
-    resetNotesByPitchClassNextNoteCounter(noteNum);
+function resetNextNoteCounters() {
+
+    var noteNums = Object.keys(notesByNoteNum);
+    for(var i=0; i< noteNums.length; i ++) {
+        var noteNum = noteNums[i];
+        resetNotesByNoteNumNextNoteCounter(noteNum);
+    }
+
+    var pitchClasses = Object.keys(notesByPitchClass);
+    for(var i=0; i< pitchClasses.length; i ++) {
+        var pc = pitchClasses[i];
+        resetNotesByPitchClassNextNoteCounter(pc);
+    }
 }
 
 function resetNotesByNoteNumNextNoteCounter(noteNum) {
@@ -81,6 +92,7 @@ function storeNoteInfo(note, start, dur) {
  */
 function analysisFinished() {
     organiseAllNotes();
+    saveState();
 }
 
 /**
@@ -185,6 +197,61 @@ function playNoteByNoteNum(noteNum) {
     outlet(0, returnArr);
 }
 
+function playBySingleNote(noteNum) {
+    if(!notesByNoteNum[noteNum]) {
+        post('NO NOTES WITH NOTE NUM:', noteNum, 'AVAILABLE TO PLAY');
+        return;
+    }
+    var noteNumObj = notesByNoteNum[noteNum];
+    var start = noteNumObj.notes[0]['start'];
+    var dur = noteNumObj.notes[0]['dur'];
+    if(quantiseState == true) {
+        dur = nearestMultiple(dur, minNoteLength)
+    }
+    var end = start + dur;
+    var returnArr = [noteNum, start, dur, end];
+
+    outlet(0, returnArr);
+}
+
+
+//=================== EXPORT AUDIO LOGIC ===================//
+
+function exportNotes() {
+    post('export notes function')
+    resetNextNoteCounters();
+
+    exportNextNote();
+}
+
+function exportNextNote() {
+    var noteNums = Object.keys(notesByNoteNum);
+
+    for(var i=0; i<noteNums.length; i++) {
+        var noteNum = noteNums[i];
+        var noteNumObj = notesByNoteNum[noteNum];
+        var nextNoteIdx = noteNumObj.nextNote;
+        if(nextNoteIdx >= noteNumObj.notes.length) {
+            continue;
+        }
+
+        var noteLetter = noteNumToNoteLetter(noteNum);
+        var noteName = noteLetter + "-" + noteNum + "-" + (nextNoteIdx + 1);
+        var note = noteNumObj.notes[nextNoteIdx];
+        if(quantiseState === true) {
+            post('exporting note with the following details:', note.start, nearestMultiple(note.dur, minNoteLength), noteName)
+            outlet(1, [note.start, nearestMultiple(note.dur, minNoteLength), noteName]);
+            noteNumObj.nextNote ++;
+            return;
+        }
+
+        post('exporting note with the following details:', note.start, note.dur, noteName)
+        outlet(1, [note.start, note.dur, noteName]);
+        noteNumObj.nextNote ++;
+        return;
+    }
+}
+
 
 //=================== MISC USER INTERACTION ===================//
 
@@ -192,6 +259,7 @@ function setMinNoteLength(noteLength) {
     minNoteLength = noteLength;
     post('\nminNoteLength is now:', minNoteLength);
     organiseAllNotes();
+    saveState();
 }
 
 function randomiseOrder() {
@@ -219,12 +287,60 @@ function randomiseOrder() {
             notesByPitchClass[key]['notes'] = shuffle(notesByPitchClass[key]['notes']);
         }
     }
+    saveState();
 }
 
 function setQuantise(quantState) {
     var newState = Boolean(quantState);
     post('\nSetting quantise state to', newState);
     quantiseState = newState;
+    saveState();
+}
+
+//=================== STATE SAVING AND RETRIEVAL ===================//
+
+/**
+ * var allNotes = []; // [{note: 72, start: 1238, dur: 670}]
+var notesByPitchClass = {}; // {"0": {nextNote: 0, notes: [{start: 3748, dur: 500}, ...]}, "1": {nextNote: 0, notes: [{start: 8394, dur: 348}, ...}]}
+var notesByNoteNum = {}; //{"62": {nextNote: 0, notes: [{start: 4672, dur: 902}, ...}], "73": {nextNote: 0, notes: [{start: 7483, dur: 203}, ...}]}
+var minNoteLength = 60;
+var quantiseState = false
+ */
+function saveState() {
+    post('saving state')
+
+    var state = {
+        allNotes: allNotes,
+        notesByPitchClass: notesByPitchClass,
+        notesByNoteNum: notesByNoteNum,
+        minNoteLength: minNoteLength,
+        quantiseState: quantiseState
+    }
+
+    outlet(2, JSON.stringify(state))
+}
+
+function recallState(stateStr) {
+    post('\nRecalling State.');
+    if(!stateStr) {
+        post('\nNo previous state found. Starting afresh.');
+        return;
+    }
+
+    try {
+        var state = JSON.parse(stateStr);
+        allNotes = state.allNotes;
+        notesByPitchClass = state.notesByPitchClass;
+        notesByNoteNum = state.notesByNoteNum;
+        minNoteLength = state.minNoteLength;
+        quantiseState = state.quantiseState;
+    } catch(err) {
+        post('\nCould not parse state. Error:', err)
+    }
+}
+
+function queryAllNoteLen() {
+    post('\n Length of allNotes array is', allNotes.length)
 }
 
 //=================== UTILITY FUNCTIONS ===================//
@@ -248,6 +364,11 @@ function shuffle(array) {
     return array;
 }
 
+function nearestQuantisedEnd(start, dur) {
+    var nm = nearestMultiple(dur, minNoteLength);
+    return nm + start
+}
+
 function nearestMultiple (val, mult) {
     var diff = val % mult;
 
@@ -257,4 +378,24 @@ function nearestMultiple (val, mult) {
 
     var res = diff > (mult/2) ? val + (mult - diff) : val - diff;
     return res;
+}
+
+function noteNumToNoteLetter (noteNum) {
+    var pitchClassToLetter = {
+        "0": "C",
+        "1": "C#",
+        "2": "D",
+        "3": "D#",
+        "4": "E",
+        "5": "F",
+        "6": "F#",
+        "7": "G",
+        "8": "G#",
+        "9": "A",
+        "10": "A#",
+        "11": "B"
+    }
+
+    var pitchClass = noteNum % 12;
+    return pitchClassToLetter[pitchClass];
 }
