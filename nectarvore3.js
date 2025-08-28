@@ -311,8 +311,8 @@ function saveState() {
 
     var state = {
         allNotes: allNotes,
-        notesByPitchClass: notesByPitchClass,
-        notesByNoteNum: notesByNoteNum,
+        // notesByPitchClass: notesByPitchClass,
+        // notesByNoteNum: notesByNoteNum,
         minNoteLength: minNoteLength,
         quantiseState: quantiseState
     }
@@ -330,10 +330,12 @@ function recallState(stateStr) {
     try {
         var state = JSON.parse(stateStr);
         allNotes = state.allNotes;
-        notesByPitchClass = state.notesByPitchClass;
-        notesByNoteNum = state.notesByNoteNum;
+        // notesByPitchClass = state.notesByPitchClass;
+        // notesByNoteNum = state.notesByNoteNum;
         minNoteLength = state.minNoteLength;
         quantiseState = state.quantiseState;
+
+        organiseAllNotes();
     } catch(err) {
         post('\nCould not parse state. Error:', err)
     }
