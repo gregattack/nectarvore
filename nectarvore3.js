@@ -1,5 +1,5 @@
 this.outlets = 3; // out1: playNote info (ie play this note at this timestamp). out2 functions for exporting audio. out3 state saving functions
-var allNotes = []; // [{note: 72, start: 1238, dur: 670}]
+var allNotes = []; // [[note#, start#, dur#], [note#, start#, dur#]] e.g. [[72, 1238, 670]]
 var notesByPitchClass = {}; // {"0": {nextNote: 0, notes: [{start: 3748, dur: 500}, ...]}, "1": {nextNote: 0, notes: [{start: 8394, dur: 348}, ...}]}
 var notesByNoteNum = {}; //{"62": {nextNote: 0, notes: [{start: 4672, dur: 902}, ...}], "73": {nextNote: 0, notes: [{start: 7483, dur: 203}, ...}]}
 var minNoteLength = 60;
@@ -78,12 +78,8 @@ function resetNotesByPitchClassNextNoteCounter(noteNum) {
  * @param {number} note 
  */
 function storeNoteInfo(note, start, dur) {
-    var noteObj = {
-        start: start,
-        dur: dur,
-        note: note
-    }
-    allNotes.push(noteObj);
+    var noteArr = [note, start, dur]
+    allNotes.push(noteArr);
     post('\nAdded note:', note, 'start:', start, 'dur:', dur, 'to allNotes array. Array length now:', allNotes.length);
 }
 
@@ -113,16 +109,20 @@ function organiseAllNotes() {
  */
 function filterInvalidNotes(noteList) {
     //filter notes for minNoteLength
-    return noteList.filter(function(noteObj) {
-        return noteObj.dur >= minNoteLength;
+    return noteList.filter(function(noteArr) {
+        return noteArr[2] >= minNoteLength;
     })
 }
 
 function organiseNotesByNoteNum(noteList) {
     resetNotesByNoteNum();
-    noteList.forEach(function(noteObj){
-        var noteNum = noteObj.note;
+    noteList.forEach(function(singleNoteArr){
+        var noteNum = singleNoteArr[0];
         notesByNoteNum[noteNum] = notesByNoteNum[noteNum] || {nextNote: 0, notes: []};
+        var noteObj = {
+            start: singleNoteArr[1],
+            dur: singleNoteArr[2]
+        }
         notesByNoteNum[noteNum]['notes'].push(noteObj);
     });
 
@@ -136,10 +136,14 @@ function organiseNotesByNoteNum(noteList) {
 
 function organiseNotesByPitchClass(noteList) {
     resetNotesByPitchClass();
-    noteList.forEach(function(noteObj) {
-        var pc = noteObj.note % 12;
+    noteList.forEach(function(singleNoteArr) {
+        var pc = singleNoteArr[0] % 12;
 
         notesByPitchClass[pc] = notesByPitchClass[pc] || {nextNote: 0, notes: []};
+        var noteObj = {
+            start: singleNoteArr[1],
+            dur: singleNoteArr[2]
+        }
         notesByPitchClass[pc]['notes'].push(noteObj)
     })
 
@@ -266,8 +270,6 @@ function randomiseOrder() {
     post('\nShuffling notesByNoteNum note order');
     var noteNumKeys = Object.keys(notesByNoteNum)
 
-    post('\nPRE: first noteNum start is:', notesByNoteNum[noteNumKeys[0]]['notes'][0]['start'])
-
     for(var i=0; i<noteNumKeys.length; i++) {
         var key = noteNumKeys[i];
 
@@ -275,8 +277,6 @@ function randomiseOrder() {
             notesByNoteNum[key]['notes'] = shuffle(notesByNoteNum[key]['notes']);
         }
     }
-
-    post('\POST: first noteNum start is:', notesByNoteNum[noteNumKeys[0]]['notes'][0]['start'])
 
     post('\nShuffling notesByPitchClass note order');
     var pitchClassKeys = Object.keys(notesByPitchClass)
@@ -300,7 +300,7 @@ function setQuantise(quantState) {
 //=================== STATE SAVING AND RETRIEVAL ===================//
 
 /**
- * var allNotes = []; // [{note: 72, start: 1238, dur: 670}]
+ * var allNotes = []; // [[72 (note), 1238(start), 670(dur)]]
 var notesByPitchClass = {}; // {"0": {nextNote: 0, notes: [{start: 3748, dur: 500}, ...]}, "1": {nextNote: 0, notes: [{start: 8394, dur: 348}, ...}]}
 var notesByNoteNum = {}; //{"62": {nextNote: 0, notes: [{start: 4672, dur: 902}, ...}], "73": {nextNote: 0, notes: [{start: 7483, dur: 203}, ...}]}
 var minNoteLength = 60;
@@ -334,16 +334,35 @@ function recallState(stateStr) {
         // notesByNoteNum = state.notesByNoteNum;
         minNoteLength = state.minNoteLength;
         quantiseState = state.quantiseState;
-
         organiseAllNotes();
     } catch(err) {
         post('\nCould not parse state. Error:', err)
     }
 }
 
-function queryAllNoteLen() {
-    post('\n Length of allNotes array is', allNotes.length)
-}
+// function compressAllNotes(allNotesArr) {
+//     // turns allNotesArray from [{note: ##, start:##, dur##}] into [[##(note), ##(start), ##(dur)]]
+//     var compressed = allNotesArr.map(function(ob) {
+//         // return Object.values(ob); // This would be nice but no Object.values in max js
+//         return Object.keys(ob).map(function(key){return ob[key]});
+//     })
+
+//     post('compressedAllNotes is note:', JSON.stringify(compressed));
+//     return compressed;
+// }
+
+// function uncompressAllNotes(compressedAllNotes) {
+//     var uncompressed = compressedAllNotes.map(function(item) {
+//         return {
+//             note: item[0],
+//             start: item[1],
+//             dur: item[2]
+//         }
+//     });
+
+//     post('uncompressedAllNotes is now:', JSON.stringify(uncompressed));
+//     return uncompressed;
+// }
 
 //=================== UTILITY FUNCTIONS ===================//
 
