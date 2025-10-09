@@ -1,3 +1,5 @@
+//© 2025 Gregory Olley. Licensed under the Music Software Public Licence - See LICENCE file for details.
+
 this.outlets = 3; // out1: playNote info (ie play this note at this timestamp). out2 functions for exporting audio. out3 state saving functions
 var allNotes = []; // [[note#, start#, dur#], [note#, start#, dur#]] e.g. [[72, 1238, 670]]
 var notesByPitchClass = {}; // {"0": {nextNote: 0, notes: [{start: 3748, dur: 500}, ...]}, "1": {nextNote: 0, notes: [{start: 8394, dur: 348}, ...}]}
