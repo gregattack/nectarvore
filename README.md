@@ -1,4 +1,5 @@
 # Welcome!
+<img src="assets/logo/Nectarvore_Logo.jpg" alt="logo" width="400">
 
 ## About
 Nectarvore is a pitch sensitive sampler. It uses automatic pitch detection to listen to an audio file and determine which pitches are present. After analysing a file you can then play back the detected notes in a few different ways.
@@ -6,6 +7,8 @@ Nectarvore is a pitch sensitive sampler. It uses automatic pitch detection to li
 ## Demo
 For a tutorial on how to install and use Nectarvore, check out this video:
 https://youtu.be/NdRKnEIHllU
+
+<img src="assets/alpha_interface_1.png" alt="interface" width="400">
 
 ## Licence
 This software is released under the Music Software Public Licence (v1.1).
