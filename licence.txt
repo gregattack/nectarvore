@@ -1,0 +1,73 @@
+MUSIC SOFTWARE PUBLIC LICENCE (v1.1)
+Copyright © 2025 Gregory Olley. All rights reserved.
+
+1. Grant of Licence
+Subject to the terms of this Licence, the Licensor grants you a non-exclusive, worldwide, royalty-free licence to use, copy, and distribute this Software (known as Nectarvore) solely for personal, educational, research, or other non-commercial purposes.
+Commercial use is expressly prohibited unless you obtain a separate commercial licence from the Licensor (see Clause 2).
+
+2. Commercial Use
+You must not use the Software for any commercial purpose without a valid commercial licence.
+For the purpose of this Licence, commercial use includes any use, distribution, modification or integration of the Software:
+a) in connection with any product, service, or activity intended for or resulting in commercial advantage or monetary compensation; or
+b) by or on behalf of any business or organisation (including not-for-profits) where the Software forms part of operations, deliverables, or a paid engagement.
+To obtain a commercial licence, contact:
+gregoryolleyaudio@gmail.com
+
+3. Restrictions
+Except as expressly permitted by this Licence or by the Copyright Act 1968 (Cth), you must not:
+a) modify, adapt, translate, or create derivative works of the Software;
+b) reverse engineer, decompile, or disassemble the Software, or otherwise attempt to derive its source code;
+c) remove, obscure, or alter any proprietary notices, trademarks, or disclaimers contained in or on the Software;
+d) make the Software available to any third party, whether by resale, distribution, sublicensing, hosting, or any other means; or
+e) use the Software in a manner that infringes the intellectual property rights of the Licensor or any third party.
+
+
+4. Intellectual Property Ownership
+The Software and all related intellectual property rights (including but not limited to copyright, moral rights, trade secrets, trademarks, and design rights) remain the exclusive property of the Licensor.
+No ownership or proprietary rights in the Software are transferred or assigned to the Licensee by virtue of this Licence.
+The Licensee must not claim or imply any ownership of, or authorship over, the Software or any derivative works.
+
+5. Attribution
+You must retain this copyright notice and a copy of this Licence in all copies or substantial portions of the Software.
+If you publicly use or refer to the Software (including in research, media, or online projects), you must provide appropriate attribution substantially as follows:
+“Built using Nectarvore by [Your Name / Company Name].”
+
+6. No Warranty
+The Software is provided “as is”, without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, or non-infringement.
+In no event shall the Licensor or copyright holders be liable for any claim, damages, or other liability arising out of or in connection with the Software or its use.
+
+7. Contributions (Optional)
+If the Licensee submits bug fixes, modifications, or enhancements (Contributions), the Licensee agrees that:
+a) the Contributions are provided voluntarily and without expectation of compensation;
+b) the Licensor may use, modify, and incorporate the Contributions into the Software without restriction; and
+c) the Licensee grants the Licensor a perpetual, irrevocable, worldwide licence to use the Contributions for any purpose.
+
+8. Termination
+This Licence terminates automatically if you breach any of its terms. Upon termination, you must cease all use of the Software and destroy all copies in your possession. Continued use or distribution after termination is prohibited unless expressly reinstated by the Licensor.
+
+9. Governing Law
+This Licence shall be governed by and construed in accordance with the laws of Queensland, Australia. The parties submit to the exclusive jurisdiction of the courts of that State and any courts of appeal from them.
+
+10. Contact
+For commercial licensing or custom terms, please contact:
+gregoryolleyaudio@gmail.com
+
+
+________________
+
+
+In GitHub you can place this near the top of your README:
+________________
+Licence
+This software is released under the Music Software Public Licence (v1.1).
+* Free for personal, educational, or research use (but if you wish to support future developments you can do so below)
+* Commercial use requires a paid licence.
+* You may not modify, adapt, or redistribute the Software for commercial purposes without permission.
+To obtain a commercial licence or discuss custom terms, please contact:
+gregoryolleyaudio@gmail.com
+
+By downloading, using, or modifying this code, you agree to the terms of the Music Software Public Licence [link].
+________________
+ Example Attribution:
+If you use this software in a public project, please include:
+“Built using Nectavore by [Your Name / Company Name] (https://github.com/gregattack/nectarvore)
