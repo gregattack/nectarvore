@@ -1,5 +1,3 @@
-Nectarvore README
-
 # Welcome!
 
 ## About
