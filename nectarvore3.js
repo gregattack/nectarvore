@@ -1,11 +1,12 @@
 //© 2025 Gregory Olley. Licensed under the Music Software Public Licence - See LICENCE file for details.
 
-this.outlets = 3; // out1: playNote info (ie play this note at this timestamp). out2 functions for exporting audio. out3 state saving functions
+this.outlets = 4; // out1: playNote info (ie play this note at this timestamp). out2 functions for exporting audio. out3 state saving functions. out4 information on which notes have been detected so far, only accepts array of length 12.
 var allNotes = []; // [[note#, start#, dur#], [note#, start#, dur#]] e.g. [[72, 1238, 670]]
 var notesByPitchClass = {}; // {"0": {nextNote: 0, notes: [{start: 3748, dur: 500}, ...]}, "1": {nextNote: 0, notes: [{start: 8394, dur: 348}, ...}]}
 var notesByNoteNum = {}; //{"62": {nextNote: 0, notes: [{start: 4672, dur: 902}, ...}], "73": {nextNote: 0, notes: [{start: 7483, dur: 203}, ...}]}
 var minNoteLength = 60;
 var quantiseState = false; // true/false. Quantise the 'dur' (and therefore also 'end') value output when playing back a note. If true these values will be quantised to the minNoteLength value.
+var notesDetected = [0,0,0,0,0,0,0,0,0,0,0,0] // An array showing which notes have been detected so far.
 
 //=================== RESET NOTE OBJECTS ===================//
 
@@ -14,6 +15,7 @@ function resetAll() {
     resetAllNotes();
     resetNotesByPitchClass();
     resetNotesByNoteNum();
+    resetNotesDetected();
 }
 
 function resetAllNotes() {
@@ -70,6 +72,11 @@ function resetNotesByPitchClassNextNoteCounter(noteNum) {
     notesByPitchClass[pitchClass]['nextNote'] = 0;
 }
 
+function resetNotesDetected() {
+    post('\nResetting notesDetected Array.')
+    notesDetected = [0,0,0,0,0,0,0,0,0,0,0,0];
+}
+
 
 //=================== ANALYSIS LOGIC ===================//
 /**
@@ -83,6 +90,15 @@ function storeNoteInfo(note, start, dur) {
     var noteArr = [note, start, dur]
     allNotes.push(noteArr);
     post('\nAdded note:', note, 'start:', start, 'dur:', dur, 'to allNotes array. Array length now:', allNotes.length);
+
+    // report which notes have been detected so far (which abide by any rules such as min length)
+    var pc = note%12;
+    if(notesDetected[pc] === 0 && testSingleNote(noteArr[2])) {
+        notesDetected[pc] = 1;
+        post('\nValid note detected. Note:', pc);
+        post('\n outputing notesDetected array:', notesDetected)
+        outlet(3, notesDetected);
+    }
 }
 
 /**
@@ -112,8 +128,20 @@ function organiseAllNotes() {
 function filterInvalidNotes(noteList) {
     //filter notes for minNoteLength
     return noteList.filter(function(noteArr) {
-        return noteArr[2] >= minNoteLength;
+        return testSingleNote(noteArr[2]);
+        // return noteOverMinLength(noteArr[2]);
+        //noteArr[2] >= minNoteLength;
     })
+}
+
+// test whether a single note passes all the necessary tests (only minNoteLength for now but this may change in the future)
+function testSingleNote(dur) {
+    return noteOverMinLength(dur);
+}
+
+// Test whether the particular note is over the minimum length of a note.
+function noteOverMinLength (dur) {
+    return dur >= minNoteLength;
 }
 
 function organiseNotesByNoteNum(noteList) {
@@ -155,6 +183,25 @@ function organiseNotesByPitchClass(noteList) {
         var notes = notesByPitchClass[noteNum]['notes'].length;
         post('organiseNotesByPitchClass:', noteNum, 'has', notes, 'notes\n');
     }
+}
+
+// Outputs which notes have been detected and pass the requirements such as minNoteLength.
+function reportDetectedNotes() {
+    resetNotesDetected();
+    var keys = Object.keys(notesByPitchClass);
+    post('\nnreportDetectedNotes: keys are:', keys)
+    if(!keys.length) {
+        post('\nreportDetectedNotes: No notes detected');
+    } else {
+        for(var i=0; i<keys.length; i++) {
+            var pc = keys[i];
+            post('\nreportDetectedNotes: pc is:', pc)
+            if(notesByPitchClass[pc]['notes'].length);
+            notesDetected[Number(pc)] = 1;
+        }
+        post('\nreportDetectedNotes: notesDetected is', notesDetected)
+    }
+    outlet(3, notesDetected);
 }
 
 // =================== PLAYBACK LOGIC ===================//
@@ -265,6 +312,7 @@ function setMinNoteLength(noteLength) {
     minNoteLength = noteLength;
     post('\nminNoteLength is now:', minNoteLength);
     organiseAllNotes();
+    reportDetectedNotes();
     saveState();
 }
 
