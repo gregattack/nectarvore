@@ -75,6 +75,7 @@ function resetNotesByPitchClassNextNoteCounter(noteNum) {
 function resetNotesDetected() {
     post('\nResetting notesDetected Array.')
     notesDetected = [0,0,0,0,0,0,0,0,0,0,0,0];
+    outlet(3, notesDetected)
 }
 
 
