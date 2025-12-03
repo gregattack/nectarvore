@@ -391,30 +391,6 @@ function recallState(stateStr) {
     }
 }
 
-// function compressAllNotes(allNotesArr) {
-//     // turns allNotesArray from [{note: ##, start:##, dur##}] into [[##(note), ##(start), ##(dur)]]
-//     var compressed = allNotesArr.map(function(ob) {
-//         // return Object.values(ob); // This would be nice but no Object.values in max js
-//         return Object.keys(ob).map(function(key){return ob[key]});
-//     })
-
-//     post('compressedAllNotes is note:', JSON.stringify(compressed));
-//     return compressed;
-// }
-
-// function uncompressAllNotes(compressedAllNotes) {
-//     var uncompressed = compressedAllNotes.map(function(item) {
-//         return {
-//             note: item[0],
-//             start: item[1],
-//             dur: item[2]
-//         }
-//     });
-
-//     post('uncompressedAllNotes is now:', JSON.stringify(uncompressed));
-//     return uncompressed;
-// }
-
 //=================== UTILITY FUNCTIONS ===================//
 
 function shuffle(array) {
