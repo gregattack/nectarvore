@@ -100,6 +100,9 @@ function storeNoteInfo(note, start, dur) {
         post('\n outputing notesDetected array:', notesDetected)
         outlet(3, notesDetected);
     }
+
+    // TODO: INEFFICIENT CHANGE THIS LATER
+    organiseAllNotes();
 }
 
 /**
