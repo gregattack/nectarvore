@@ -19,7 +19,7 @@ Free for personal, educational, or research use (but if you wish to support futu
  gregoryolleyaudio@gmail.com
 - By downloading, using, or modifying this code, you agree to the terms of the Music Software Public Licence [\[link\]](https://github.com/gregattack/nectarvore/blob/7335fdb44952d18c630e02da0e59caddbaff4117/licence.txt).
 
-## Instillation
+## Installation
 Download the following files and place somewhere on your computer. Make sure they are all in the same folder.
 - nectarvore3.amxd
 - nectarvore3.js
