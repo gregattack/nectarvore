@@ -1,14 +1,26 @@
 mgraphics.init();
 mgraphics.autofill = 0;
 mgraphics.relative_coords = 0;
+this.inlets = 1;
 
 var notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 var pitchClassesDetected = [0,0,0,0,0,0,0,0,0,0,0];
 
-// var noteArr = [note, start, dur, colour(if drawn), angle(if drawn), thickness(if drawn)]
-var notesDetected = [
 
-] 
+/*
+noteArr = {
+    id: {
+        pc,
+        start,
+        dur,
+        passFail,
+        colour,
+        angle,
+        thickness
+    }
+}
+*/
+var notesDetected = {}
 
 function paint() {
     // let [width, height] = mgraphics.size;
@@ -30,47 +42,80 @@ function paint() {
 
 // ================== INDIVIDUAL ELEMENTS ================== //
 
-function drawNoteLines(width, height, radius, notesArr) {
+function drawNoteLines(width, height, radius, notesOb) {
     var centreX = width/2;
     var centreY = height/2;
-    var colours = [
+
+    var passNotes = []
+
+    var noteIds = Object.keys(notesOb);
+    for(var i=0; i<noteIds.length; i++) {
+        var noteId = noteIds[i];
+        var note = notesOb[noteId]; // {note, start, dur, passFail, colour?, angle?, thickness?}
+
+        // collect all the passing notes because we want to draw them last
+        if(note.passFail === 1) {
+            passNotes.push(note);
+            continue;
+        }
+        drawNoteLine(note, centreX, centreY, width, height, radius);
+    }
+
+    for(var i=0; i<passNotes.length; i++) {
+        var note = passNotes[i];
+        drawNoteLine(note, centreX, centreY, width, height, radius)
+    }
+}
+
+function drawNoteLine(noteOb, centreX, centreY, windowWidth, windowHeight, outerCirlceRadius) {
+    var colour = getNoteLineColour(noteOb);
+    mgraphics.set_source_rgba(colour.r, colour.g, colour.b, colour.a);
+
+    var startPoint = getNoteLineAngle(noteOb, windowWidth, windowHeight, outerCirlceRadius);
+
+    var lineSize = getNoteLineThickness(noteOb);
+    mgraphics.set_line_width(lineSize);
+    mgraphics.move_to(startPoint[0], startPoint[1]);
+    mgraphics.line_to(centreX, centreY);
+    mgraphics.stroke();
+}
+
+function getNoteLineColour(noteOb) {
+    if(noteOb.passFail === 0) {
+        return hslToRgba(0, 0, 56, 60); // grey
+    }
+    var yellows = [
         hslToRgba(44, 98, 55, 100), // bright yellow
         hslToRgba(34, 100, 50, 100), // orange
         hslToRgba(29, 83, 70, 100), // tan-ish
         hslToRgba(43, 87, 48, 100) // darker yellow
-    ]
-    for(var i=0; i<notesArr.length; i++) {
-        var note = notesArr[i];
-
-        if(!note[3]) {
-            note.push(choose(colours));
-        } 
-        var colour = note[3];
-        // var colour = choose(colours);
-        mgraphics.set_source_rgba(colour.r, colour.g, colour.b, colour.a);
-
-        if(!note[4]) {
-            var pc = note[0];
-            var angleSliceStart = pc * 30 - 15;
-            var angleSliceStop = pc * 30 + 15;
-            post('\nangleSlice\nStart:', angleSliceStart, '--- Stop:', angleSliceStop)
-            var angle = randomRange(angleSliceStart, angleSliceStop); // choose randomly between a slice of the pie
-            post('\nangle:', angle)
-            var sPoint = pointOnCircleInWindow(width, height, radius, angle); // start point
-            note.push([sPoint.x, sPoint.y]); 
-        }
-        var startPoint = note[4];
-
-        if(!note[5]) {
-            var thickness = scaleToRange([60, 2000], [1, 12], note[2]); 
-            note.push(thickness);
-        }
-        var lineSize = note[5];
-        mgraphics.set_line_width(lineSize);
-        mgraphics.move_to(startPoint[0], startPoint[1]);
-        mgraphics.line_to(centreX, centreY);
-        mgraphics.stroke();
+    ];
+    if(!noteOb.colour) {
+        noteOb.colour = choose(yellows);
     }
+    return noteOb.colour;
+}
+
+function getNoteLineThickness(noteOb) {
+    if(noteOb.thickness) {
+        return noteOb.thickness;
+    }
+    var thickness = scaleToRange([60, 2000], [1, 12], noteOb.dur); 
+    noteOb.thickness = thickness;
+    return noteOb.thickness
+}
+
+function getNoteLineAngle(noteOb, windowWidth, windowHeight, outerCirlceRadius) {
+    if(noteOb.angle && noteOb.angle.length) {
+        return noteOb.angle;
+    }
+    var pc = noteOb.pc;
+    var angleSliceStart = pc * 30 - 15;
+    var angleSliceStop = pc * 30 + 15;
+    var angle = randomRange(angleSliceStart, angleSliceStop); // choose randomly between a slice of the pie
+    var sPoint = pointOnCircleInWindow(windowWidth, windowHeight, outerCirlceRadius, angle); // start point
+    noteOb.angle = [sPoint.x, sPoint.y];
+    return noteOb.angle;
 }
 
 function drawBackgroundSquare(width, height) {
@@ -189,16 +234,39 @@ function drawNoteNames(width, height) {
 
 // ================ DATA INPUT FUNCTIONS ================ //
 function init() {
-    notesDetected = [];
-    pitchClassesDetected = [0,0,0,0,0,0,0,0,0,0,0];
+    notesDetected = {};
+    pitchClassesDetected = [0,0,0,0,0,0,0,0,0,0,0,0];
     mgraphics.redraw();
 }
 
-function storeNoteInfo(note, start, dur) {
-    post('storing note:', note, start, dur)
-    var pc = note%12;
-    notesDetected.push([pc, start, dur]);
-    pitchClassesDetected[pc] = 1;
+function redraw() {
+    mgraphics.redraw();
+}
+
+// takes [id, note, start, dur, pass/fail]
+function storeNoteInfo(noteId, noteNum, noteStart, noteDur, notePassFail) {
+    
+    var pc = noteNum%12;
+    if(notePassFail === 1) {
+        pitchClassesDetected[pc] = 1;
+    }
+
+    // add new note data to notesDetected obj
+    if(!notesDetected[noteId]) {
+        notesDetected[noteId] = {
+            pc: pc,
+            start: noteStart,
+            dur: noteDur,
+            passFail: notePassFail
+        } 
+    } else {
+        notesDetected[noteId]['passFail'] = notePassFail;
+    }
+}
+
+// ================ INTERNAL FUNCTIONS ================ //
+function resetPCDetected() {
+    pitchClassesDetected = [0,0,0,0,0,0,0,0,0,0,0,0];
     mgraphics.redraw();
 }
 

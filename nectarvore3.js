@@ -1,12 +1,13 @@
 //© 2025 Gregory Olley. Licensed under the Music Software Public Licence - See LICENCE file for details.
 
-this.outlets = 4; // out1: playNote info (ie play this note at this timestamp). out2 functions for exporting audio. out3 state saving functions. out4 information on which notes have been detected so far, only accepts array of length 12.
-var allNotes = []; // [[note#, start#, dur#], [note#, start#, dur#]] e.g. [[72, 1238, 670]]
+this.outlets = 4; // out1: playNote info (ie play this note at this timestamp). out2 functions for exporting audio. out3 state saving functions. out4: ui information
+var allNotes = []; // [id, note#, start#, dur#], [id, note#, start#, dur#]] e.g. [[283, 72, 1238, 670]]
 var notesByPitchClass = {}; // {"0": {nextNote: 0, notes: [{start: 3748, dur: 500}, ...]}, "1": {nextNote: 0, notes: [{start: 8394, dur: 348}, ...}]}
 var notesByNoteNum = {}; //{"62": {nextNote: 0, notes: [{start: 4672, dur: 902}, ...}], "73": {nextNote: 0, notes: [{start: 7483, dur: 203}, ...}]}
 var minNoteLength = 60;
 var quantiseState = false; // true/false. Quantise the 'dur' (and therefore also 'end') value output when playing back a note. If true these values will be quantised to the minNoteLength value.
 var notesDetected = [0,0,0,0,0,0,0,0,0,0,0,0] // An array showing which notes have been detected so far.
+var _noteID = 1; // This is the ID given to each note. It is incremented for each new note.
 
 //=================== RESET NOTE OBJECTS ===================//
 
@@ -15,7 +16,7 @@ function resetAll() {
     resetAllNotes();
     resetNotesByPitchClass();
     resetNotesByNoteNum();
-    resetNotesDetected();
+    // resetNotesDetected();
 }
 
 function resetAllNotes() {
@@ -72,12 +73,6 @@ function resetNotesByPitchClassNextNoteCounter(noteNum) {
     notesByPitchClass[pitchClass]['nextNote'] = 0;
 }
 
-function resetNotesDetected() {
-    post('\nResetting notesDetected Array.')
-    notesDetected = [0,0,0,0,0,0,0,0,0,0,0,0];
-    outlet(3, notesDetected)
-}
-
 
 //=================== ANALYSIS LOGIC ===================//
 /**
@@ -88,25 +83,29 @@ function resetNotesDetected() {
  * @param {number} note 
  */
 function storeNoteInfo(note, start, dur) {
-    var noteArr = [note, start, dur]
+    var noteArr = [_noteID, note, start, dur];
+    _noteID++;
     allNotes.push(noteArr);
-    post('\nAdded note:', note, 'start:', start, 'dur:', dur, 'to allNotes array. Array length now:', allNotes.length);
+    post('\nAdded note: ID:', noteArr[0], '- note:', noteArr[1], '- start:', noteArr[2], '- dur:', noteArr[3], 'to allNotes array. Array length now:', allNotes.length);
 
-    // report which notes have been detected so far (which abide by any rules such as min length)
-    var pc = note%12;
-    if(notesDetected[pc] === 0 && testSingleNote(noteArr[2])) {
-        notesDetected[pc] = 1;
-        post('\nValid note detected. Note:', pc);
-        post('\n outputing notesDetected array:', notesDetected)
-        outlet(3, notesDetected);
+    // If note passes tests, add it to noteByPitchClass and notesByNoteNum objects
+    if(testSingleNote(noteArr)) {
+        organiseSingleNoteByNoteNum(noteArr);
+        organiseNotesByPitchClass(noteArr);
+        noteArr.push(1); // tests passed marker
+    } else {
+        noteArr.push(0) // tests failed marker
     }
+
+    // export the note data (including whether it passed tests)
+    outlet(3, 'storeNoteInfo', noteArr); //[id, note, start, dur, pass/fail]
+    redrawUI();
 }
 
 /**
  * function to be called when max has finished analysing an audio file.
  */
 function analysisFinished() {
-    organiseAllNotes();
     saveState();
 }
 
@@ -115,7 +114,6 @@ function analysisFinished() {
  * This is also where notes are filtered for minLength etc.
  */
 function organiseAllNotes() {
-    post('\norganiseAllNotes')
     var validNotes = filterInvalidNotes(allNotes);
     organiseNotesByNoteNum(validNotes);
     organiseNotesByPitchClass(validNotes);
@@ -128,15 +126,20 @@ function organiseAllNotes() {
  */
 function filterInvalidNotes(noteList) {
     //filter notes for minNoteLength
-    return noteList.filter(function(noteArr) {
-        return testSingleNote(noteArr[2]);
-        // return noteOverMinLength(noteArr[2]);
-        //noteArr[2] >= minNoteLength;
-    })
+    var validNotes = noteList.filter(function(noteArr) {
+        var res = testSingleNote(noteArr);
+        // send note date to jsui interface
+        outlet(3, 'storeNoteInfo', [noteArr[0], noteArr[1], noteArr[2], noteArr[3], Number(res)]); 
+        return res;
+    });
+    redrawUI();
+    return validNotes;
 }
 
 // test whether a single note passes all the necessary tests (only minNoteLength for now but this may change in the future)
-function testSingleNote(dur) {
+// noteArr = [ID, start, dur, end]
+function testSingleNote(noteArr) {
+    var dur = noteArr[3];
     return noteOverMinLength(dur);
 }
 
@@ -147,15 +150,7 @@ function noteOverMinLength (dur) {
 
 function organiseNotesByNoteNum(noteList) {
     resetNotesByNoteNum();
-    noteList.forEach(function(singleNoteArr){
-        var noteNum = singleNoteArr[0];
-        notesByNoteNum[noteNum] = notesByNoteNum[noteNum] || {nextNote: 0, notes: []};
-        var noteObj = {
-            start: singleNoteArr[1],
-            dur: singleNoteArr[2]
-        }
-        notesByNoteNum[noteNum]['notes'].push(noteObj);
-    });
+    noteList.forEach(organiseSingleNoteByNoteNum);
 
     var allNoteNums = Object.keys(notesByNoteNum);
     for(var i=0; i<allNoteNums.length; i++) {
@@ -165,18 +160,20 @@ function organiseNotesByNoteNum(noteList) {
     }
 }
 
+function organiseSingleNoteByNoteNum(singleNoteArr) {
+    var noteNum = singleNoteArr[1];
+    notesByNoteNum[noteNum] = notesByNoteNum[noteNum] || {nextNote: 0, notes: []};
+    var noteObj = {
+        id: singleNoteArr[0],
+        start: singleNoteArr[2],
+        dur: singleNoteArr[3]
+    }
+    notesByNoteNum[noteNum]['notes'].push(noteObj);
+}
+
 function organiseNotesByPitchClass(noteList) {
     resetNotesByPitchClass();
-    noteList.forEach(function(singleNoteArr) {
-        var pc = singleNoteArr[0] % 12;
-
-        notesByPitchClass[pc] = notesByPitchClass[pc] || {nextNote: 0, notes: []};
-        var noteObj = {
-            start: singleNoteArr[1],
-            dur: singleNoteArr[2]
-        }
-        notesByPitchClass[pc]['notes'].push(noteObj)
-    })
+    noteList.forEach(organiseSingleNoteByPC);
 
     var allNoteNums = Object.keys(notesByPitchClass);
     for(var i=0; i<allNoteNums.length; i++) {
@@ -186,23 +183,16 @@ function organiseNotesByPitchClass(noteList) {
     }
 }
 
-// Outputs which notes have been detected and pass the requirements such as minNoteLength.
-function reportDetectedNotes() {
-    resetNotesDetected();
-    var keys = Object.keys(notesByPitchClass);
-    post('\nnreportDetectedNotes: keys are:', keys)
-    if(!keys.length) {
-        post('\nreportDetectedNotes: No notes detected');
-    } else {
-        for(var i=0; i<keys.length; i++) {
-            var pc = keys[i];
-            post('\nreportDetectedNotes: pc is:', pc)
-            if(notesByPitchClass[pc]['notes'].length);
-            notesDetected[Number(pc)] = 1;
-        }
-        post('\nreportDetectedNotes: notesDetected is', notesDetected)
+function organiseSingleNoteByPC(singleNoteArr) {
+    var pc = singleNoteArr[1] % 12;
+
+    notesByPitchClass[pc] = notesByPitchClass[pc] || {nextNote: 0, notes: []};
+    var noteObj = {
+        id: singleNoteArr[0],
+        start: singleNoteArr[2],
+        dur: singleNoteArr[3]
     }
-    outlet(3, notesDetected);
+    notesByPitchClass[pc]['notes'].push(noteObj)
 }
 
 // =================== PLAYBACK LOGIC ===================//
@@ -312,8 +302,8 @@ function exportNextNote() {
 function setMinNoteLength(noteLength) {
     minNoteLength = noteLength;
     post('\nminNoteLength is now:', minNoteLength);
+    // filter all notes with new min note length
     organiseAllNotes();
-    reportDetectedNotes();
     saveState();
 }
 
@@ -446,4 +436,8 @@ function noteNumToNoteLetter (noteNum) {
 
     var pitchClass = noteNum % 12;
     return pitchClassToLetter[pitchClass];
+}
+
+function redrawUI() {
+    outlet(3, 'redraw');
 }
