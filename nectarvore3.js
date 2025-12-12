@@ -16,6 +16,7 @@ function resetAll() {
     resetAllNotes();
     resetNotesByPitchClass();
     resetNotesByNoteNum();
+    resetNextNoteCounters();
     // resetNotesDetected();
 }
 
@@ -75,6 +76,7 @@ function resetNotesByPitchClassNextNoteCounter(noteNum) {
 
 
 //=================== ANALYSIS LOGIC ===================//
+
 /**
  * Takes any and all notes (regardless of min length etc) and stores them in an array.
  * this array can then be sorted later into a more useful object.
@@ -91,7 +93,7 @@ function storeNoteInfo(note, start, dur) {
     // If note passes tests, add it to noteByPitchClass and notesByNoteNum objects
     if(testSingleNote(noteArr)) {
         organiseSingleNoteByNoteNum(noteArr);
-        organiseNotesByPitchClass(noteArr);
+        organiseSingleNoteByPC(noteArr);
         noteArr.push(1); // tests passed marker
     } else {
         noteArr.push(0) // tests failed marker
@@ -172,7 +174,7 @@ function organiseSingleNoteByNoteNum(singleNoteArr) {
 }
 
 function organiseNotesByPitchClass(noteList) {
-    resetNotesByPitchClass();
+    // resetNotesByPitchClass();
     noteList.forEach(organiseSingleNoteByPC);
 
     var allNoteNums = Object.keys(notesByPitchClass);
