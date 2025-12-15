@@ -23,6 +23,7 @@ Free for personal, educational, or research use (but if you wish to support futu
 Download the following files and place somewhere on your computer. Make sure they are all in the same folder.
 - nectarvore3.amxd
 - nectarvore3.js
+- interface.js
 - sampPlayback.maxpat
 
 ## Development
