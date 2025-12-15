@@ -350,7 +350,7 @@ var minNoteLength = 60;
 var quantiseState = false
  */
 function saveState() {
-    post('saving state')
+    post('\nsaving state')
 
     var state = {
         allNotes: allNotes,
