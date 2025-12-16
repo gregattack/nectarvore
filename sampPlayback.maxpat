@@ -209,7 +209,7 @@
  ]
 									}
 ,
-									"patching_rect" : [ -13.5, 341.0, 85.0, 22.0 ],
+									"patching_rect" : [ -13.5, 341.0, 93.0, 22.0 ],
 									"saved_object_attributes" : 									{
 										"description" : "",
 										"digest" : "",
@@ -219,7 +219,7 @@
 										"tags" : ""
 									}
 ,
-									"text" : "p setBufName"
+									"text" : "p readBufName"
 								}
 
 							}
@@ -1286,7 +1286,7 @@
  ]
 									}
 ,
-									"patching_rect" : [ -13.5, 341.0, 85.0, 22.0 ],
+									"patching_rect" : [ -13.5, 341.0, 93.0, 22.0 ],
 									"saved_object_attributes" : 									{
 										"description" : "",
 										"digest" : "",
@@ -1296,7 +1296,7 @@
 										"tags" : ""
 									}
 ,
-									"text" : "p setBufName"
+									"text" : "p readBufName"
 								}
 
 							}
@@ -2296,10 +2296,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 671.0, 55.0, 28.0, 22.0 ],
-					"saved_object_attributes" : 					{
-						"attr_comment" : ""
-					}
-,
 					"text" : "in 3"
 				}
 
@@ -2428,10 +2424,6 @@
 					"numinlets" : 1,
 					"numoutlets" : 0,
 					"patching_rect" : [ 331.535714328289032, 530.892858326435089, 35.0, 22.0 ],
-					"saved_object_attributes" : 					{
-						"attr_comment" : ""
-					}
-,
 					"text" : "out 3"
 				}
 
@@ -2443,10 +2435,6 @@
 					"numinlets" : 1,
 					"numoutlets" : 0,
 					"patching_rect" : [ 236.5, 534.0, 42.0, 22.0 ],
-					"saved_object_attributes" : 					{
-						"attr_comment" : ""
-					}
-,
 					"text" : "out~ 2"
 				}
 
@@ -2472,6 +2460,10 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 331.535714328289032, 271.071425795555115, 28.0, 22.0 ],
+					"saved_object_attributes" : 					{
+						"attr_comment" : ""
+					}
+,
 					"text" : "in 2"
 				}
 
@@ -2485,6 +2477,10 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 80.0, 50.0, 28.0, 22.0 ],
+					"saved_object_attributes" : 					{
+						"attr_comment" : ""
+					}
+,
 					"text" : "in 1"
 				}
 
@@ -2496,10 +2492,6 @@
 					"numinlets" : 1,
 					"numoutlets" : 0,
 					"patching_rect" : [ 190.5, 534.0, 42.0, 22.0 ],
-					"saved_object_attributes" : 					{
-						"attr_comment" : ""
-					}
-,
 					"text" : "out~ 1"
 				}
 
