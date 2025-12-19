@@ -26,8 +26,8 @@ Unzip this file somewhere on your computer and make sure to keep all of the resu
 To use it simply drag and drop 'nectarvore3.amxd' onto an empty midi track in Ableton.
 
 Alternatively you can download the following files and place somewhere on your computer. Make sure they are all in the same folder.
-- nectarvore3.amxd
-- nectarvore3.js
+- nectarvore.amxd
+- nectarvore.js
 - interface.js
 - sampPlayback.maxpat
 - record_button.jpg
