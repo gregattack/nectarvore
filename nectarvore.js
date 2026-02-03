@@ -2,8 +2,8 @@
 
 this.outlets = 4; // out1: playNote info (ie play this note at this timestamp). out2 functions for exporting audio. out3 state saving functions. out4: ui information
 var allNotes = []; // [id, note#, start#, dur#], [id, note#, start#, dur#]] e.g. [[283, 72, 1238, 670]]
-var notesByPitchClass = {}; // {"0": {nextNote: 0, notes: [{start: 3748, dur: 500}, ...]}, "1": {nextNote: 0, notes: [{start: 8394, dur: 348}, ...}]}
-var notesByNoteNum = {}; //{"62": {nextNote: 0, notes: [{start: 4672, dur: 902}, ...}], "73": {nextNote: 0, notes: [{start: 7483, dur: 203}, ...}]}
+var notesByPitchClass = {}; // {"0": {nextNote: 0, notes: [{id: ##, start: 3748, dur: 500}, ...]}, "1": {nextNote: 0, notes: [{id: ##, start: 8394, dur: 348}, ...}]}
+var notesByNoteNum = {}; //{"62": {nextNote: 0, notes: [{id: ##, start: 4672, dur: 902}, ...}], "73": {nextNote: 0, notes: [{id: ##, start: 7483, dur: 203}, ...}]}
 var minNoteLength = 60;
 var quantiseState = false; // true/false. Quantise the 'dur' (and therefore also 'end') value output when playing back a note. If true these values will be quantised to the minNoteLength value.
 var notesDetected = [0,0,0,0,0,0,0,0,0,0,0,0] // An array showing which notes have been detected so far.
@@ -17,6 +17,7 @@ function resetAll() {
     resetNotesByPitchClass();
     resetNotesByNoteNum();
     resetNextNoteCounters();
+    _noteID = 1
     // resetNotesDetected();
 }
 
@@ -207,8 +208,10 @@ function playNoteByPitchClass(noteNum) {
     }
     var pitchClassObj = notesByPitchClass[pitchClass];
     var currNextNote = pitchClassObj.nextNote % pitchClassObj.notes.length;
-    var start = pitchClassObj.notes[currNextNote]['start'];
-    var dur = pitchClassObj.notes[currNextNote]['dur'];
+    var thisNoteObj = pitchClassObj.notes[currNextNote];
+    var start = thisNoteObj['start'];
+    var dur = thisNoteObj['dur'];
+    var id = thisNoteObj['id'];
     if(quantiseState == true) {
         var oldDur = dur;
         dur = nearestMultiple(dur, minNoteLength)
@@ -220,6 +223,7 @@ function playNoteByPitchClass(noteNum) {
     pitchClassObj.nextNote ++
 
     outlet(0, returnArr);
+    setUINoteStart(id); // sets the right note to be highlighted in the UI
 }
 
 
@@ -230,8 +234,11 @@ function playNoteByNoteNum(noteNum) {
     }
     var noteNumObj = notesByNoteNum[noteNum];
     var currNextNote = noteNumObj.nextNote % noteNumObj.notes.length;
-    var start = noteNumObj.notes[currNextNote]['start'];
-    var dur = noteNumObj.notes[currNextNote]['dur'];
+
+    var thisNoteObj = noteNumObj.notes[currNextNote]
+    var start = thisNoteObj['start'];
+    var dur = thisNoteObj['dur'];
+    var id = thisNoteObj['id'];
     if(quantiseState == true) {
         dur = nearestMultiple(dur, minNoteLength)
     }
@@ -241,6 +248,7 @@ function playNoteByNoteNum(noteNum) {
     noteNumObj.nextNote ++
 
     outlet(0, returnArr);
+    setUINoteStart(id)
 }
 
 function playBySingleNote(noteNum) {
@@ -381,6 +389,12 @@ function recallState(stateStr) {
     } catch(err) {
         post('\nCould not parse state. Error:', err)
     }
+}
+
+//=================== UI RELATED FUNCTIONS ===================//
+function setUINoteStart(id) {
+    post('\nnectarvore.js: sending note play message to ui with id:', id);
+    outlet(3, 'setUINoteStart', id);
 }
 
 //=================== UTILITY FUNCTIONS ===================//

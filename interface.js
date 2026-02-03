@@ -2,13 +2,14 @@ mgraphics.init();
 mgraphics.autofill = 0;
 mgraphics.relative_coords = 0;
 this.inlets = 1;
+this.outlets = 1;
 
-var notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-var pitchClassesDetected = [0,0,0,0,0,0,0,0,0,0,0];
-
+// var notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+// var pitchClassesDetected = [0,0,0,0,0,0,0,0,0,0,0];
+// var currentlyPlayingNotes = [] // [[id, angle, thickness], [id, angle, thickness]]
 
 /*
-noteArr = {
+noteDetected = {
     id: {
         pc,
         start,
@@ -31,13 +32,13 @@ function paint() {
 
     drawNoteLines(width, height, width/2, notesDetected);
 
-    drawOuterCircle(width, height);
+    // drawOuterCircle(width, height);
 
     // draw note name text
-    drawNoteNames(width, height)
+    // drawNoteNames(width, height)
 
     // inner circle(s)
-    drawInnerCircle(width, height);
+    // drawInnerCircle(width, height);
 }
 
 // ================== INDIVIDUAL ELEMENTS ================== //
@@ -234,8 +235,10 @@ function drawNoteNames(width, height) {
 
 // ================ DATA INPUT FUNCTIONS ================ //
 function init() {
+    _noteID = 0;
     notesDetected = {};
     pitchClassesDetected = [0,0,0,0,0,0,0,0,0,0,0,0];
+    // currentlyPlayingNotes = [];
     mgraphics.redraw();
 }
 
@@ -262,6 +265,23 @@ function storeNoteInfo(noteId, noteNum, noteStart, noteDur, notePassFail) {
     } else {
         notesDetected[noteId]['passFail'] = notePassFail;
     }
+}
+
+/**
+ * Updates state with currently playing notes;
+ * Adds a note ([id, angle, thickness]) to the currentlyPlayingNotes array which is then used to draw parts of the UI.
+ * @param {int} id 
+ */
+function setUINoteStart(id) {
+    post('\ninterface.js:: setUINoteStart: new note start received with id:', id, '\n')
+    var note = notesDetected[id];
+    if(!note) {
+        post('\ninterface.js: ERROR - Could not find note with id:', id);
+        return;
+    }
+    var playingNote = [id, note.angle, note.thickness];
+
+    outlet(0, 'notePlayStart', playingNote);
 }
 
 // ================ INTERNAL FUNCTIONS ================ //
