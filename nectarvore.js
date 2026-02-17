@@ -1,6 +1,6 @@
 //© 2025 Gregory Olley. Licensed under the Music Software Public Licence - See LICENCE file for details.
 
-this.outlets = 4; // out1: playNote info (ie play this note at this timestamp). out2 functions for exporting audio. out3 state saving functions. out4: ui information
+this.outlets = 5; // out1: playNote info (ie play this note at this timestamp). out2 functions for exporting audio. out3 state saving functions. out4: ui information. out5: live export info
 var allNotes = []; // [id, note#, start#, dur#], [id, note#, start#, dur#]] e.g. [[283, 72, 1238, 670]]
 var notesByPitchClass = {}; // {"0": {nextNote: 0, notes: [{start: 3748, dur: 500}, ...]}, "1": {nextNote: 0, notes: [{start: 8394, dur: 348}, ...}]}
 var notesByNoteNum = {}; //{"62": {nextNote: 0, notes: [{start: 4672, dur: 902}, ...}], "73": {nextNote: 0, notes: [{start: 7483, dur: 203}, ...}]}
@@ -8,6 +8,8 @@ var minNoteLength = 60;
 var quantiseState = false; // true/false. Quantise the 'dur' (and therefore also 'end') value output when playing back a note. If true these values will be quantised to the minNoteLength value.
 var notesDetected = [0,0,0,0,0,0,0,0,0,0,0,0] // An array showing which notes have been detected so far.
 var _noteID = 1; // This is the ID given to each note. It is incremented for each new note.
+var liveExportPath = ""; // This is the folder where samples are exported to if the user has chosen to export them live.
+var liveExportToggle = 0; // This is the on/off state of the live export feature.
 
 //=================== RESET NOTE OBJECTS ===================//
 
@@ -95,9 +97,20 @@ function storeNoteInfo(note, start, dur) {
         organiseSingleNoteByNoteNum(noteArr);
         organiseSingleNoteByPC(noteArr);
         noteArr.push(1); // tests passed marker
+
+        // LIVE EXPORT STUFF
+        if(liveExportToggle && liveExportPath.length > 0) {
+            var noteLetter = noteNumToNoteLetter(note);
+            var noteIdx = notesByNoteNum[note]['notes']['length'];
+            var noteName = noteLetter + "-" + note + "-" + noteIdx + '.wav';
+            var fullPath = liveExportPath + noteName;
+            post('\nfullPath is:', fullPath);
+            outlet(4, [start, dur, fullPath]);
+        }
     } else {
         noteArr.push(0) // tests failed marker
     }
+
 
     // export the note data (including whether it passed tests)
     outlet(3, 'storeNoteInfo', noteArr); //[id, note, start, dur, pass/fail]
@@ -296,6 +309,19 @@ function exportNextNote() {
         noteNumObj.nextNote ++;
         return;
     }
+}
+
+function setLiveExportPath() {
+    var args = arrayfromargs(arguments);
+    args = args.join(" ");
+    post('\nargs list is:', args);
+    liveExportPath = args;
+    post('\nliveExportPath is now:', liveExportPath);
+}
+
+function setLiveExportToggle(state) {
+    liveExportToggle = state;
+    post('\nliveExportToggle is now:', liveExportToggle);
 }
 
 
