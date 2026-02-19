@@ -6,8 +6,8 @@ var notesByPitchClass = {}; // {"0": {nextNote: 0, notes: [{id: ##, start: 3748,
 var notesByNoteNum = {}; //{"62": {nextNote: 0, notes: [{id: ##, start: 4672, dur: 902}, ...}], "73": {nextNote: 0, notes: [{id: ##, start: 7483, dur: 203}, ...}]}
 var minNoteLength = 60;
 var quantiseState = false; // true/false. Quantise the 'dur' (and therefore also 'end') value output when playing back a note. If true these values will be quantised to the minNoteLength value.
-var notesDetected = [0,0,0,0,0,0,0,0,0,0,0,0] // An array showing which notes have been detected so far.
 var _noteID = 1; // This is the ID given to each note. It is incremented for each new note.
+var currentlyPlayingNoteIDS = [];
 
 //=================== RESET NOTE OBJECTS ===================//
 
@@ -17,8 +17,8 @@ function resetAll() {
     resetNotesByPitchClass();
     resetNotesByNoteNum();
     resetNextNoteCounters();
+    currentlyPlayingNoteIDS = [];
     _noteID = 1
-    // resetNotesDetected();
 }
 
 function resetAllNotes() {
@@ -216,12 +216,13 @@ function playNoteByPitchClass(noteNum) {
         post('\nQuantise is set to true so changing dur from', oldDur, 'to', dur)
     }
     var end = start + dur;
-    var returnArr = [noteNum, start, dur, end];
+    var returnArr = [id, noteNum, start, dur, end];
 
     pitchClassObj.nextNote ++
 
-    outlet(0, returnArr);
-    setUINoteStart(id); // sets the right note to be highlighted in the UI
+    outlet(0, returnArr); // sends message to audio looper
+
+    noteIDStartPlaying(id); // sends message to ui (outlet 4) with a list of ids of notes that are currently playing
 }
 
 
@@ -241,12 +242,13 @@ function playNoteByNoteNum(noteNum) {
         dur = nearestMultiple(dur, minNoteLength)
     }
     var end = start + dur;
-    var returnArr = [noteNum, start, dur, end];
+    var returnArr = [id, noteNum, start, dur, end];
 
     noteNumObj.nextNote ++
 
     outlet(0, returnArr);
-    setUINoteStart(id)
+
+    noteIDStartPlaying(id); // sends message to ui (outlet 4) with a list of ids of notes that are currently playing
 }
 
 function playBySingleNote(noteNum) {
@@ -266,11 +268,25 @@ function playBySingleNote(noteNum) {
     outlet(0, returnArr);
 }
 
+function noteIDStartPlaying(id) {
+    currentlyPlayingNoteIDS.push(id);
+    outlet(3, 'currentlyPlayingNoteIDS', currentlyPlayingNoteIDS);
+}
+
+function noteIDStopPlaying(id) {
+    var idx = currentlyPlayingNoteIDS.indexOf(id);
+    if(idx < 0) {
+        post('\nWARNING: noteIDStopPlaying called with an id value which is not playing');
+        return
+    }
+    currentlyPlayingNoteIDS.splice(idx, 1);
+    outlet(3, 'currentlyPlayingNoteIDS', currentlyPlayingNoteIDS);
+}
+
 
 //=================== EXPORT AUDIO LOGIC ===================//
 
 function exportNotes() {
-    post('export notes function')
     resetNextNoteCounters();
 
     exportNextNote();
@@ -390,10 +406,10 @@ function recallState(stateStr) {
 }
 
 //=================== UI RELATED FUNCTIONS ===================//
-function setUINoteStart(id) {
-    post('\nnectarvore.js: sending note play message to ui with id:', id);
-    outlet(3, 'setUINoteStart', id);
-}
+// function setUINoteStart(id) {
+//     post('\nnectarvore.js: sending note play message to ui with id:', id);
+//     outlet(3, 'setUINoteStart', id);
+// }
 
 //=================== UTILITY FUNCTIONS ===================//
 

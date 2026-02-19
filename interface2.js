@@ -1,11 +1,12 @@
 mgraphics.init();
 mgraphics.autofill = 0;
 mgraphics.relative_coords = 0;
-this.inlets = 1;
+this.inlets = 1; 
+var currentlyPlayingNotes = []; // e.g. {"pc":11,"start":16193,"dur":100,"passFail":1,"colour":{"r":0.9490000000000001,"g":0.6917,"b":0.45099999999999996,"a":1},"thickness":1.2268041237113403,"startPoint":[53.049506961456366,7.229613793849893]}   
+
 
 var notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-var pitchClassesDetected = [0,0,0,0,0,0,0,0,0,0,0];
-var currentlyPlayingNotes = [] // [[id, angle, thickness], [id, angle, thickness]]
+var currentlyPlayingNotes = [] 
 
 function paint() {
 
@@ -13,25 +14,15 @@ function paint() {
     var height = mgraphics.size[1];
 
     drawCurrentlyPlayingNotes(width, height, currentlyPlayingNotes);
-
-    // drawOuterCircle(width, height);
-
-    // drawNoteNames(width, height);
-
-    // drawInnerCircle(width, height);
 }
 
 /**
- * Adds to the currentlyPlayingNotes array
- * This then triggers a redraw of the interface
- * @param {number} id
- * @param {[number, number]} angle [x, y] coords
- * @param {number} thickness 
+ * Updates a list of currently playing notes
+ * receives data like this: [{"pc":2,"start":2076,"dur":2000,"passFail":1,"colour":{"r":1,"g":0.5666666666666667,"b":0,"a":1},"angle":[169.7122942060787,63.3787364232774],"thickness":12,"startPoint":[169.7122942060787,63.3787364232774]}] 
  */
-function notePlayStart(id, angle, thickness) {
-    post('interface2 :: notePlayStart: id', id, 'angle', angle, 'thickness', thickness);
-    var noteStartArr = [id, angle, thickness];
-    currentlyPlayingNotes.push(noteStartArr)
+function setPlayingNotes() {
+    var notes = arrayfromargs(arguments); //
+    currentlyPlayingNotes = notes;
     mgraphics.redraw();
 }
 
@@ -42,136 +33,27 @@ function drawCurrentlyPlayingNotes(width, height, notesArr) {
 
     for(var i=0; i<notesArr.length; i++) {
         var note = notesArr[i];
-        var angle = note[1];
-        var thickness = note[2];
+        var startP = note.startPoint;
+        var thickness = note.thickness;
 
-        drawPlayingNoteLine(angle, thickness, centreX, centreY)
+        drawPlayingNoteLine(startP, thickness, centreX, centreY)
     }
 }
 
-function drawPlayingNoteLine(angle, thickness, centreX, centreY) {
+function drawPlayingNoteLine(startPos, thickness, centreX, centreY) {
     var colour = hslToRgba(187, 98, 49, 100) // blue
     mgraphics.set_source_rgba(colour.r, colour.g, colour.b, colour.a);
 
     mgraphics.set_line_width(thickness);
-    mgraphics.move_to(angle[0], angle[1]);
+    mgraphics.move_to(startPos[0], startPos[1]);
     mgraphics.line_to(centreX, centreY);
     mgraphics.stroke();
 }
-
-// function drawOuterCircle(width, height) {
-//     // Grey circle border
-//     mgraphics.set_source_rgba(0.27, 0.27, 0.27, 1); // Grey color
-    
-//     var circXPos = width/2;
-//     var circYPos = height/2;
-//     mgraphics.set_line_width(3);
-
-//     mgraphics.arc(circXPos, circYPos, (width/2) * 0.85, 0, 2*Math.PI);
-//     mgraphics.stroke();
-
-//     // Black circle border
-//     mgraphics.set_source_rgba(0, 0, 0, 1); // Grey color
-//     mgraphics.set_line_width((width/2)*0.3);
-
-//     mgraphics.arc(circXPos, circYPos, width/2, 0, 2*Math.PI);
-//     mgraphics.stroke();
-// }
-
-
-// function drawNoteNames(width, height) {
-//     var fontSize = width * 0.045;
-//     for(var i=0; i<notes.length; i++) {
-
-//         var colour = hslToRgba(187, 98, 49, 100)
-
-//         if(pitchClassesDetected[i] == 1) { // yellow for notes that are detected
-//             colour = hslToRgba(44, 98, 55, 100)
-//         }
-//         mgraphics.set_source_rgba(colour.r, colour.g, colour.b, colour.a);
-
-//         mgraphics.set_font_size(fontSize);
-
-//         var angle = 30 * i;
-//         var point = pointOnCircleInWindow(width, height, width*0.46, angle);
-//         var xOffset = fontSize/2.5;
-//         var yOffset = fontSize/3;
-//         if(notes[i] === 'G#') {
-//             xOffset = fontSize/1.5;
-//             mgraphics.move_to(point.x - xOffset, point.y + yOffset);
-//         } else {
-//             mgraphics.move_to(point.x - xOffset, point.y + yOffset);
-//         }
-//         mgraphics.show_text(notes[i][0]);
-
-//         if(notes[i][1]) {
-//             mgraphics.move_to(point.x - xOffset + fontSize*0.75, point.y + yOffset - fontSize/2);
-//             mgraphics.set_font_size(fontSize/1.75);
-//             mgraphics.show_text(notes[i][1]);
-//         }
-//     }
-// }
-
-// function drawInnerCircle(width, height) {
-//     // inner circle(s)
-//     var innerCWidth = width * 0.25;
-//     var InnerCHeight = height * 0.25;
-
-//     mgraphics.set_line_width(2);
-//     //Grey outer circle
-//     mgraphics.set_source_rgba(0.27, 0.27, 0.27, 1); // Purple color
-//     var greyCWidth = innerCWidth;
-//     var greyCHeight = InnerCHeight;
-//     var greyCX = width/2 - greyCWidth/2;
-//     var greyCY = height/2 - greyCHeight/2;
-//     mgraphics.ellipse(greyCX, greyCY, greyCWidth, greyCHeight)
-//     mgraphics.fill();
-
-//     // Black outer circle
-//     mgraphics.set_source_rgba(0, 0, 0, 1); // Purple color
-//     var blackCWidth = innerCWidth - 2;
-//     var blackCHeight = InnerCHeight - 2;
-//     var blackCX = width/2 - blackCWidth/2;
-//     var blackCY = height/2 - blackCHeight/2;
-//     mgraphics.ellipse(blackCX, blackCY, blackCWidth, blackCHeight)
-//     mgraphics.fill();
-
-//     // Inner mauve circle 1
-//     var mauve = hslToRgba(282, 30, 18, 100);
-//     mgraphics.set_source_rgba(mauve.r, mauve.g, mauve.b, mauve.a); // Purple color
-//     mauveW = innerCWidth * 0.75;
-//     mauveH = InnerCHeight * 0.75;
-//     mauveX = width/2 - mauveW/2;
-//     mauveY = height/2 - mauveH/2;
-//     mgraphics.ellipse(mauveX, mauveY, mauveW, mauveH)
-//     mgraphics.fill();
-
-//     // Inner purple circle
-//     var purple = hslToRgba(265, 68, 30, 100);
-//     mgraphics.set_source_rgba(purple.r, purple.g, purple.b, purple.a); // Purple color
-//     purpleW = innerCWidth * 0.55;
-//     purpleH = InnerCHeight * 0.55;
-//     purpleX = width/2 - purpleW/2;
-//     purpleY = height/2 - purpleH/2;
-//     mgraphics.ellipse(purpleX, purpleY, purpleW, purpleH)
-//     mgraphics.fill();
-
-//     // Innermost violet circle
-//     var violet = hslToRgba(260, 89, 34, 100);
-//     mgraphics.set_source_rgba(violet.r, violet.g, violet.b, violet.a); // violet color
-//     violetW = innerCWidth * 0.3;
-//     violetH = InnerCHeight * 0.3;
-//     violetX = width/2 - violetW/2;
-//     violetY = height/2 - violetH/2;
-//     mgraphics.ellipse(violetX, violetY, violetW, violetH)
-//     mgraphics.fill();
-// }
 
 // ===================== UTILITY ===================== //
 
 function init() {
     currentlyPlayingNotes = [];
-    pitchClassesDetected = [0,0,0,0,0,0,0,0,0,0,0];
     mgraphics.redraw();
 }
 

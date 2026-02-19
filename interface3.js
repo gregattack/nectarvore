@@ -4,7 +4,7 @@ mgraphics.relative_coords = 0;
 this.inlets = 1;
 
 var notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-var pitchClassesDetected = [0,0,0,0,0,0,0,0,0,0,0];
+var pitchClassesDetected = [0,0,0,0,0,0,0,0,0,0,0,0];
 
 function paint() {
 
@@ -137,7 +137,7 @@ function drawInnerCircle(width, height) {
 // ===================== UTILITY ===================== //
 
 function init() {
-    pitchClassesDetected = [0,0,0,0,0,0,0,0,0,0,0];
+    pitchClassesDetected = [0,0,0,0,0,0,0,0,0,0,0,0];
     mgraphics.redraw();
 }
 
