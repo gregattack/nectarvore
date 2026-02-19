@@ -102,7 +102,6 @@ function storeNoteInfo(note, start, dur) {
 
     // export the note data (including whether it passed tests)
     outlet(3, 'storeNoteInfo', noteArr); //[id, note, start, dur, pass/fail]
-    redrawUI();
 }
 
 /**
@@ -135,7 +134,6 @@ function filterInvalidNotes(noteList) {
         outlet(3, 'storeNoteInfo', [noteArr[0], noteArr[1], noteArr[2], noteArr[3], Number(res)]); 
         return res;
     });
-    redrawUI();
     return validNotes;
 }
 
@@ -452,8 +450,4 @@ function noteNumToNoteLetter (noteNum) {
 
     var pitchClass = noteNum % 12;
     return pitchClassToLetter[pitchClass];
-}
-
-function redrawUI() {
-    outlet(3, 'redraw');
 }

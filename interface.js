@@ -2,7 +2,7 @@ mgraphics.init();
 mgraphics.autofill = 0;
 mgraphics.relative_coords = 0;
 this.inlets = 1;
-this.outlets = 1;
+this.outlets = 2; // outlet1 = info to interface2.js --- outlet2 = info to interface3.js
 
 // var notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 // var pitchClassesDetected = [0,0,0,0,0,0,0,0,0,0,0];
@@ -126,79 +126,79 @@ function drawBackgroundSquare(width, height) {
     mgraphics.fill()
 }
 
-function drawOuterCircle(width, height) {
-    // Grey circle border
-    mgraphics.set_source_rgba(0.27, 0.27, 0.27, 1); // Grey color
+// function drawOuterCircle(width, height) {
+//     // Grey circle border
+//     mgraphics.set_source_rgba(0.27, 0.27, 0.27, 1); // Grey color
     
-    var circXPos = width/2;
-    var circYPos = height/2;
-    mgraphics.set_line_width(3);
+//     var circXPos = width/2;
+//     var circYPos = height/2;
+//     mgraphics.set_line_width(3);
 
-    mgraphics.arc(circXPos, circYPos, (width/2) * 0.85, 0, 2*Math.PI);
-    mgraphics.stroke();
+//     mgraphics.arc(circXPos, circYPos, (width/2) * 0.85, 0, 2*Math.PI);
+//     mgraphics.stroke();
 
-    // Black circle border
-    mgraphics.set_source_rgba(0, 0, 0, 1); // Grey color
-    mgraphics.set_line_width((width/2)*0.3);
+//     // Black circle border
+//     mgraphics.set_source_rgba(0, 0, 0, 1); // Grey color
+//     mgraphics.set_line_width((width/2)*0.3);
 
-    mgraphics.arc(circXPos, circYPos, width/2, 0, 2*Math.PI);
-    mgraphics.stroke();
-}
+//     mgraphics.arc(circXPos, circYPos, width/2, 0, 2*Math.PI);
+//     mgraphics.stroke();
+// }
 
-function drawInnerCircle(width, height) {
-    // inner circle(s)
-    var innerCWidth = width * 0.25;
-    var InnerCHeight = height * 0.25;
+// function drawInnerCircle(width, height) {
+//     // inner circle(s)
+//     var innerCWidth = width * 0.25;
+//     var InnerCHeight = height * 0.25;
 
-    mgraphics.set_line_width(2);
-    //Grey outer circle
-    mgraphics.set_source_rgba(0.27, 0.27, 0.27, 1); // Purple color
-    var greyCWidth = innerCWidth;
-    var greyCHeight = InnerCHeight;
-    var greyCX = width/2 - greyCWidth/2;
-    var greyCY = height/2 - greyCHeight/2;
-    mgraphics.ellipse(greyCX, greyCY, greyCWidth, greyCHeight)
-    mgraphics.fill();
+//     mgraphics.set_line_width(2);
+//     //Grey outer circle
+//     mgraphics.set_source_rgba(0.27, 0.27, 0.27, 1); // Purple color
+//     var greyCWidth = innerCWidth;
+//     var greyCHeight = InnerCHeight;
+//     var greyCX = width/2 - greyCWidth/2;
+//     var greyCY = height/2 - greyCHeight/2;
+//     mgraphics.ellipse(greyCX, greyCY, greyCWidth, greyCHeight)
+//     mgraphics.fill();
 
-    // Black outer circle
-    mgraphics.set_source_rgba(0, 0, 0, 1); // Purple color
-    var blackCWidth = innerCWidth - 2;
-    var blackCHeight = InnerCHeight - 2;
-    var blackCX = width/2 - blackCWidth/2;
-    var blackCY = height/2 - blackCHeight/2;
-    mgraphics.ellipse(blackCX, blackCY, blackCWidth, blackCHeight)
-    mgraphics.fill();
+//     // Black outer circle
+//     mgraphics.set_source_rgba(0, 0, 0, 1); // Purple color
+//     var blackCWidth = innerCWidth - 2;
+//     var blackCHeight = InnerCHeight - 2;
+//     var blackCX = width/2 - blackCWidth/2;
+//     var blackCY = height/2 - blackCHeight/2;
+//     mgraphics.ellipse(blackCX, blackCY, blackCWidth, blackCHeight)
+//     mgraphics.fill();
 
-    // Inner mauve circle 1
-    var mauve = hslToRgba(282, 30, 18, 100);
-    mgraphics.set_source_rgba(mauve.r, mauve.g, mauve.b, mauve.a); // Purple color
-    mauveW = innerCWidth * 0.75;
-    mauveH = InnerCHeight * 0.75;
-    mauveX = width/2 - mauveW/2;
-    mauveY = height/2 - mauveH/2;
-    mgraphics.ellipse(mauveX, mauveY, mauveW, mauveH)
-    mgraphics.fill();
+//     // Inner mauve circle 1
+//     var mauve = hslToRgba(282, 30, 18, 100);
+//     mgraphics.set_source_rgba(mauve.r, mauve.g, mauve.b, mauve.a); // Purple color
+//     mauveW = innerCWidth * 0.75;
+//     mauveH = InnerCHeight * 0.75;
+//     mauveX = width/2 - mauveW/2;
+//     mauveY = height/2 - mauveH/2;
+//     mgraphics.ellipse(mauveX, mauveY, mauveW, mauveH)
+//     mgraphics.fill();
 
-    // Inner purple circle
-    var purple = hslToRgba(265, 68, 30, 100);
-    mgraphics.set_source_rgba(purple.r, purple.g, purple.b, purple.a); // Purple color
-    purpleW = innerCWidth * 0.55;
-    purpleH = InnerCHeight * 0.55;
-    purpleX = width/2 - purpleW/2;
-    purpleY = height/2 - purpleH/2;
-    mgraphics.ellipse(purpleX, purpleY, purpleW, purpleH)
-    mgraphics.fill();
+//     // Inner purple circle
+//     var purple = hslToRgba(265, 68, 30, 100);
+//     mgraphics.set_source_rgba(purple.r, purple.g, purple.b, purple.a); // Purple color
+//     purpleW = innerCWidth * 0.55;
+//     purpleH = InnerCHeight * 0.55;
+//     purpleX = width/2 - purpleW/2;
+//     purpleY = height/2 - purpleH/2;
+//     mgraphics.ellipse(purpleX, purpleY, purpleW, purpleH)
+//     mgraphics.fill();
 
-    // Innermost violet circle
-    var violet = hslToRgba(260, 89, 34, 100);
-    mgraphics.set_source_rgba(violet.r, violet.g, violet.b, violet.a); // violet color
-    violetW = innerCWidth * 0.3;
-    violetH = InnerCHeight * 0.3;
-    violetX = width/2 - violetW/2;
-    violetY = height/2 - violetH/2;
-    mgraphics.ellipse(violetX, violetY, violetW, violetH)
-    mgraphics.fill();
-}
+//     // Innermost violet circle
+//     var violet = hslToRgba(260, 89, 34, 100);
+//     mgraphics.set_source_rgba(violet.r, violet.g, violet.b, violet.a); // violet color
+//     violetW = innerCWidth * 0.3;
+//     violetH = InnerCHeight * 0.3;
+//     violetX = width/2 - violetW/2;
+//     violetY = height/2 - violetH/2;
+//     mgraphics.ellipse(violetX, violetY, violetW, violetH)
+//     mgraphics.fill();
+// }
 
 function drawNoteNames(width, height) {
     var fontSize = width * 0.045;
@@ -242,9 +242,9 @@ function init() {
     mgraphics.redraw();
 }
 
-function redraw() {
-    mgraphics.redraw();
-}
+// function redraw() {
+//     mgraphics.redraw();
+// }
 
 // takes [id, note, start, dur, pass/fail]
 function storeNoteInfo(noteId, noteNum, noteStart, noteDur, notePassFail) {
@@ -265,6 +265,9 @@ function storeNoteInfo(noteId, noteNum, noteStart, noteDur, notePassFail) {
     } else {
         notesDetected[noteId]['passFail'] = notePassFail;
     }
+    mgraphics.redraw();
+
+    outlet(1, 'pitchClassDetected', pc);
 }
 
 /**
@@ -272,17 +275,17 @@ function storeNoteInfo(noteId, noteNum, noteStart, noteDur, notePassFail) {
  * Adds a note ([id, angle, thickness]) to the currentlyPlayingNotes array which is then used to draw parts of the UI.
  * @param {int} id 
  */
-function setUINoteStart(id) {
-    post('\ninterface.js:: setUINoteStart: new note start received with id:', id, '\n')
-    var note = notesDetected[id];
-    if(!note) {
-        post('\ninterface.js: ERROR - Could not find note with id:', id);
-        return;
-    }
-    var playingNote = [id, note.angle, note.thickness];
+// function setUINoteStart(id) {
+//     post('\ninterface.js:: setUINoteStart: new note start received with id:', id, '\n')
+//     var note = notesDetected[id];
+//     if(!note) {
+//         post('\ninterface.js: ERROR - Could not find note with id:', id);
+//         return;
+//     }
+//     var playingNote = [id, note.angle, note.thickness];
 
-    outlet(0, 'notePlayStart', playingNote);
-}
+//     outlet(0, 'notePlayStart', playingNote);
+// }
 
 // ================ INTERNAL FUNCTIONS ================ //
 function resetPCDetected() {

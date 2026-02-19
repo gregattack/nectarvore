@@ -14,11 +14,11 @@ function paint() {
 
     drawCurrentlyPlayingNotes(width, height, currentlyPlayingNotes);
 
-    drawOuterCircle(width, height);
+    // drawOuterCircle(width, height);
 
-    drawNoteNames(width, height);
+    // drawNoteNames(width, height);
 
-    drawInnerCircle(width, height);
+    // drawInnerCircle(width, height);
 }
 
 /**
@@ -59,113 +59,113 @@ function drawPlayingNoteLine(angle, thickness, centreX, centreY) {
     mgraphics.stroke();
 }
 
-function drawOuterCircle(width, height) {
-    // Grey circle border
-    mgraphics.set_source_rgba(0.27, 0.27, 0.27, 1); // Grey color
+// function drawOuterCircle(width, height) {
+//     // Grey circle border
+//     mgraphics.set_source_rgba(0.27, 0.27, 0.27, 1); // Grey color
     
-    var circXPos = width/2;
-    var circYPos = height/2;
-    mgraphics.set_line_width(3);
+//     var circXPos = width/2;
+//     var circYPos = height/2;
+//     mgraphics.set_line_width(3);
 
-    mgraphics.arc(circXPos, circYPos, (width/2) * 0.85, 0, 2*Math.PI);
-    mgraphics.stroke();
+//     mgraphics.arc(circXPos, circYPos, (width/2) * 0.85, 0, 2*Math.PI);
+//     mgraphics.stroke();
 
-    // Black circle border
-    mgraphics.set_source_rgba(0, 0, 0, 1); // Grey color
-    mgraphics.set_line_width((width/2)*0.3);
+//     // Black circle border
+//     mgraphics.set_source_rgba(0, 0, 0, 1); // Grey color
+//     mgraphics.set_line_width((width/2)*0.3);
 
-    mgraphics.arc(circXPos, circYPos, width/2, 0, 2*Math.PI);
-    mgraphics.stroke();
-}
+//     mgraphics.arc(circXPos, circYPos, width/2, 0, 2*Math.PI);
+//     mgraphics.stroke();
+// }
 
 
-function drawNoteNames(width, height) {
-    var fontSize = width * 0.045;
-    for(var i=0; i<notes.length; i++) {
+// function drawNoteNames(width, height) {
+//     var fontSize = width * 0.045;
+//     for(var i=0; i<notes.length; i++) {
 
-        var colour = hslToRgba(187, 98, 49, 100)
+//         var colour = hslToRgba(187, 98, 49, 100)
 
-        if(pitchClassesDetected[i] == 1) { // yellow for notes that are detected
-            colour = hslToRgba(44, 98, 55, 100)
-        }
-        mgraphics.set_source_rgba(colour.r, colour.g, colour.b, colour.a);
+//         if(pitchClassesDetected[i] == 1) { // yellow for notes that are detected
+//             colour = hslToRgba(44, 98, 55, 100)
+//         }
+//         mgraphics.set_source_rgba(colour.r, colour.g, colour.b, colour.a);
 
-        mgraphics.set_font_size(fontSize);
+//         mgraphics.set_font_size(fontSize);
 
-        var angle = 30 * i;
-        var point = pointOnCircleInWindow(width, height, width*0.46, angle);
-        var xOffset = fontSize/2.5;
-        var yOffset = fontSize/3;
-        if(notes[i] === 'G#') {
-            xOffset = fontSize/1.5;
-            mgraphics.move_to(point.x - xOffset, point.y + yOffset);
-        } else {
-            mgraphics.move_to(point.x - xOffset, point.y + yOffset);
-        }
-        mgraphics.show_text(notes[i][0]);
+//         var angle = 30 * i;
+//         var point = pointOnCircleInWindow(width, height, width*0.46, angle);
+//         var xOffset = fontSize/2.5;
+//         var yOffset = fontSize/3;
+//         if(notes[i] === 'G#') {
+//             xOffset = fontSize/1.5;
+//             mgraphics.move_to(point.x - xOffset, point.y + yOffset);
+//         } else {
+//             mgraphics.move_to(point.x - xOffset, point.y + yOffset);
+//         }
+//         mgraphics.show_text(notes[i][0]);
 
-        if(notes[i][1]) {
-            mgraphics.move_to(point.x - xOffset + fontSize*0.75, point.y + yOffset - fontSize/2);
-            mgraphics.set_font_size(fontSize/1.75);
-            mgraphics.show_text(notes[i][1]);
-        }
-    }
-}
+//         if(notes[i][1]) {
+//             mgraphics.move_to(point.x - xOffset + fontSize*0.75, point.y + yOffset - fontSize/2);
+//             mgraphics.set_font_size(fontSize/1.75);
+//             mgraphics.show_text(notes[i][1]);
+//         }
+//     }
+// }
 
-function drawInnerCircle(width, height) {
-    // inner circle(s)
-    var innerCWidth = width * 0.25;
-    var InnerCHeight = height * 0.25;
+// function drawInnerCircle(width, height) {
+//     // inner circle(s)
+//     var innerCWidth = width * 0.25;
+//     var InnerCHeight = height * 0.25;
 
-    mgraphics.set_line_width(2);
-    //Grey outer circle
-    mgraphics.set_source_rgba(0.27, 0.27, 0.27, 1); // Purple color
-    var greyCWidth = innerCWidth;
-    var greyCHeight = InnerCHeight;
-    var greyCX = width/2 - greyCWidth/2;
-    var greyCY = height/2 - greyCHeight/2;
-    mgraphics.ellipse(greyCX, greyCY, greyCWidth, greyCHeight)
-    mgraphics.fill();
+//     mgraphics.set_line_width(2);
+//     //Grey outer circle
+//     mgraphics.set_source_rgba(0.27, 0.27, 0.27, 1); // Purple color
+//     var greyCWidth = innerCWidth;
+//     var greyCHeight = InnerCHeight;
+//     var greyCX = width/2 - greyCWidth/2;
+//     var greyCY = height/2 - greyCHeight/2;
+//     mgraphics.ellipse(greyCX, greyCY, greyCWidth, greyCHeight)
+//     mgraphics.fill();
 
-    // Black outer circle
-    mgraphics.set_source_rgba(0, 0, 0, 1); // Purple color
-    var blackCWidth = innerCWidth - 2;
-    var blackCHeight = InnerCHeight - 2;
-    var blackCX = width/2 - blackCWidth/2;
-    var blackCY = height/2 - blackCHeight/2;
-    mgraphics.ellipse(blackCX, blackCY, blackCWidth, blackCHeight)
-    mgraphics.fill();
+//     // Black outer circle
+//     mgraphics.set_source_rgba(0, 0, 0, 1); // Purple color
+//     var blackCWidth = innerCWidth - 2;
+//     var blackCHeight = InnerCHeight - 2;
+//     var blackCX = width/2 - blackCWidth/2;
+//     var blackCY = height/2 - blackCHeight/2;
+//     mgraphics.ellipse(blackCX, blackCY, blackCWidth, blackCHeight)
+//     mgraphics.fill();
 
-    // Inner mauve circle 1
-    var mauve = hslToRgba(282, 30, 18, 100);
-    mgraphics.set_source_rgba(mauve.r, mauve.g, mauve.b, mauve.a); // Purple color
-    mauveW = innerCWidth * 0.75;
-    mauveH = InnerCHeight * 0.75;
-    mauveX = width/2 - mauveW/2;
-    mauveY = height/2 - mauveH/2;
-    mgraphics.ellipse(mauveX, mauveY, mauveW, mauveH)
-    mgraphics.fill();
+//     // Inner mauve circle 1
+//     var mauve = hslToRgba(282, 30, 18, 100);
+//     mgraphics.set_source_rgba(mauve.r, mauve.g, mauve.b, mauve.a); // Purple color
+//     mauveW = innerCWidth * 0.75;
+//     mauveH = InnerCHeight * 0.75;
+//     mauveX = width/2 - mauveW/2;
+//     mauveY = height/2 - mauveH/2;
+//     mgraphics.ellipse(mauveX, mauveY, mauveW, mauveH)
+//     mgraphics.fill();
 
-    // Inner purple circle
-    var purple = hslToRgba(265, 68, 30, 100);
-    mgraphics.set_source_rgba(purple.r, purple.g, purple.b, purple.a); // Purple color
-    purpleW = innerCWidth * 0.55;
-    purpleH = InnerCHeight * 0.55;
-    purpleX = width/2 - purpleW/2;
-    purpleY = height/2 - purpleH/2;
-    mgraphics.ellipse(purpleX, purpleY, purpleW, purpleH)
-    mgraphics.fill();
+//     // Inner purple circle
+//     var purple = hslToRgba(265, 68, 30, 100);
+//     mgraphics.set_source_rgba(purple.r, purple.g, purple.b, purple.a); // Purple color
+//     purpleW = innerCWidth * 0.55;
+//     purpleH = InnerCHeight * 0.55;
+//     purpleX = width/2 - purpleW/2;
+//     purpleY = height/2 - purpleH/2;
+//     mgraphics.ellipse(purpleX, purpleY, purpleW, purpleH)
+//     mgraphics.fill();
 
-    // Innermost violet circle
-    var violet = hslToRgba(260, 89, 34, 100);
-    mgraphics.set_source_rgba(violet.r, violet.g, violet.b, violet.a); // violet color
-    violetW = innerCWidth * 0.3;
-    violetH = InnerCHeight * 0.3;
-    violetX = width/2 - violetW/2;
-    violetY = height/2 - violetH/2;
-    mgraphics.ellipse(violetX, violetY, violetW, violetH)
-    mgraphics.fill();
-}
+//     // Innermost violet circle
+//     var violet = hslToRgba(260, 89, 34, 100);
+//     mgraphics.set_source_rgba(violet.r, violet.g, violet.b, violet.a); // violet color
+//     violetW = innerCWidth * 0.3;
+//     violetH = InnerCHeight * 0.3;
+//     violetX = width/2 - violetW/2;
+//     violetY = height/2 - violetH/2;
+//     mgraphics.ellipse(violetX, violetY, violetW, violetH)
+//     mgraphics.fill();
+// }
 
 // ===================== UTILITY ===================== //
 
