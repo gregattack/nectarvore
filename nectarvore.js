@@ -276,7 +276,7 @@ function noteIDStartPlaying(id) {
 function noteIDStopPlaying(id) {
     var idx = currentlyPlayingNoteIDS.indexOf(id);
     if(idx < 0) {
-        post('\nWARNING: noteIDStopPlaying called with an id value which is not playing');
+        post('\nWARNING: noteIDStopPlaying called with an id value of', id, 'which is not playing');
         return
     }
     currentlyPlayingNoteIDS.splice(idx, 1);
