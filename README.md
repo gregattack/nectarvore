@@ -29,6 +29,8 @@ Alternatively you can download the following files and place somewhere on your c
 - nectarvore.amxd
 - nectarvore.js
 - interface.js
+- interface2.js
+- interface3.js
 - sampPlayback.maxpat
 - record_button.jpg
 
