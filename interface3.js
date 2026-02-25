@@ -20,7 +20,7 @@ function paint() {
 
 function pitchClassDetected(pc) {
     if(pitchClassesDetected[pc] === 0) {
-        post('\nNew pc detected:', pc, 'Updating interface.');
+        post('New pc detected:', pc, 'Updating interface.');
         pitchClassesDetected[pc] = 1;
         mgraphics.redraw();
     }

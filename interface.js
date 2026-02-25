@@ -59,7 +59,7 @@ function drawNoteLines(width, height, radius, notesOb) {
 
     for(var i=0; i<passNotesIds.length; i++) {
         var id = passNotesIds[i];
-        var note = notesDetected[id];
+        var note = notesOb[id];
         drawNoteLine(note, centreX, centreY, width, height, radius)
     }
 }
@@ -68,10 +68,10 @@ function drawNoteLine(noteOb, centreX, centreY, windowWidth, windowHeight, outer
     var colour = getNoteLineColour(noteOb);
     mgraphics.set_source_rgba(colour.r, colour.g, colour.b, colour.a);
 
-    var startPoint = getNoteLineAngle(noteOb, windowWidth, windowHeight, outerCirlceRadius);
+    var startPoint = getNoteLineStartPoint(noteOb, windowWidth, windowHeight, outerCirlceRadius);
 
     var thickness = getNoteLineThickness(noteOb);
-    noteOb.colour = colour;
+    // noteOb.colour = colour;
     noteOb.startPoint = startPoint;
     noteOb.thickness = thickness;
 
@@ -106,7 +106,7 @@ function getNoteLineThickness(noteOb) {
     return noteOb.thickness
 }
 
-function getNoteLineAngle(noteOb, windowWidth, windowHeight, outerCirlceRadius) {
+function getNoteLineStartPoint(noteOb, windowWidth, windowHeight, outerCirlceRadius) {
     if(noteOb.startPoint && noteOb.startPoint.length) {
         return noteOb.startPoint;
     }
@@ -136,7 +136,7 @@ function init() {
 
 // takes [id, note, start, dur, pass/fail]
 function storeNoteInfo(noteId, noteNum, noteStart, noteDur, notePassFail) {
-    
+    // post('\nstoreNoteInfo notePassFail: ' + notePassFail);
     var pc = noteNum%12;
     if(notePassFail === 1) {
         outlet(1, 'pitchClassDetected', pc);
@@ -162,13 +162,16 @@ function storeNoteInfo(noteId, noteNum, noteStart, noteDur, notePassFail) {
  */
 function currentlyPlayingNoteIDS() {
     var ids = arrayfromargs(arguments)
-    post('\ncurrentlyPlayingNoteIDS received ids:', ids)
+    if(ids.length) {
+        post('\ncurrentlyPlayingNoteIDS received ids: ' + ids)
+    }
+
     var playingNotes = [];
     for(var i=0; i<ids.length; i++) {
         var id = ids[i];
         var noteLineInfo = notesDetected[id];
         if(!noteLineInfo) {
-            post('\nERROR: currentlyPlayingNoteIDS no note line info can be found for note with id:', id);
+            post('\nERROR: currentlyPlayingNoteIDS no note line info can be found for note with id: ' + id);
             // return;
         }
         playingNotes.push(noteLineInfo);
