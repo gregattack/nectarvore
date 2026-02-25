@@ -2,12 +2,12 @@
 
 this.outlets = 4; // out1: playNote info (ie play this note at this timestamp). out2 functions for exporting audio. out3 state saving functions. out4: ui information
 var allNotes = []; // [id, note#, start#, dur#], [id, note#, start#, dur#]] e.g. [[283, 72, 1238, 670]]
-var notesByPitchClass = {}; // {"0": {nextNote: 0, notes: [{start: 3748, dur: 500}, ...]}, "1": {nextNote: 0, notes: [{start: 8394, dur: 348}, ...}]}
-var notesByNoteNum = {}; //{"62": {nextNote: 0, notes: [{start: 4672, dur: 902}, ...}], "73": {nextNote: 0, notes: [{start: 7483, dur: 203}, ...}]}
+var notesByPitchClass = {}; // {"0": {nextNote: 0, notes: [{id: ##, start: 3748, dur: 500}, ...]}, "1": {nextNote: 0, notes: [{id: ##, start: 8394, dur: 348}, ...}]}
+var notesByNoteNum = {}; //{"62": {nextNote: 0, notes: [{id: ##, start: 4672, dur: 902}, ...}], "73": {nextNote: 0, notes: [{id: ##, start: 7483, dur: 203}, ...}]}
 var minNoteLength = 60;
 var quantiseState = false; // true/false. Quantise the 'dur' (and therefore also 'end') value output when playing back a note. If true these values will be quantised to the minNoteLength value.
-var notesDetected = [0,0,0,0,0,0,0,0,0,0,0,0] // An array showing which notes have been detected so far.
 var _noteID = 1; // This is the ID given to each note. It is incremented for each new note.
+var playMode = 0; // 0 = play by pitch class;; 1 = play by note;; 2 = play single note.
 
 //=================== RESET NOTE OBJECTS ===================//
 
@@ -17,7 +17,7 @@ function resetAll() {
     resetNotesByPitchClass();
     resetNotesByNoteNum();
     resetNextNoteCounters();
-    // resetNotesDetected();
+    _noteID = 1
 }
 
 function resetAllNotes() {
@@ -101,7 +101,6 @@ function storeNoteInfo(note, start, dur) {
 
     // export the note data (including whether it passed tests)
     outlet(3, 'storeNoteInfo', noteArr); //[id, note, start, dur, pass/fail]
-    redrawUI();
 }
 
 /**
@@ -130,11 +129,11 @@ function filterInvalidNotes(noteList) {
     //filter notes for minNoteLength
     var validNotes = noteList.filter(function(noteArr) {
         var res = testSingleNote(noteArr);
+        // post('\nfilterInvalidNotes res is ' + res);
         // send note date to jsui interface
         outlet(3, 'storeNoteInfo', [noteArr[0], noteArr[1], noteArr[2], noteArr[3], Number(res)]); 
         return res;
     });
-    redrawUI();
     return validNotes;
 }
 
@@ -174,7 +173,7 @@ function organiseSingleNoteByNoteNum(singleNoteArr) {
 }
 
 function organiseNotesByPitchClass(noteList) {
-    // resetNotesByPitchClass();
+    resetNotesByPitchClass();
     noteList.forEach(organiseSingleNoteByPC);
 
     var allNoteNums = Object.keys(notesByPitchClass);
@@ -207,19 +206,24 @@ function playNoteByPitchClass(noteNum) {
     }
     var pitchClassObj = notesByPitchClass[pitchClass];
     var currNextNote = pitchClassObj.nextNote % pitchClassObj.notes.length;
-    var start = pitchClassObj.notes[currNextNote]['start'];
-    var dur = pitchClassObj.notes[currNextNote]['dur'];
+
+    var thisNoteObj = pitchClassObj.notes[currNextNote];
+    var start = thisNoteObj['start'];
+    var dur = thisNoteObj['dur'];
+    var id = thisNoteObj['id'];
     if(quantiseState == true) {
-        var oldDur = dur;
+        // var oldDur = dur;
         dur = nearestMultiple(dur, minNoteLength)
-        post('\nQuantise is set to true so changing dur from', oldDur, 'to', dur)
+        // post('\nQuantise is set to true so changing dur from', oldDur, 'to', dur)
     }
     var end = start + dur;
-    var returnArr = [noteNum, start, dur, end];
+    var returnArr = [id, noteNum, start, dur, end];
 
     pitchClassObj.nextNote ++
 
-    outlet(0, returnArr);
+    outlet(0, returnArr); // sends message to audio looper
+
+    // noteIDStartPlaying(id); // sends message to ui (outlet 4) with a list of ids of notes that are currently playing
 }
 
 
@@ -230,17 +234,22 @@ function playNoteByNoteNum(noteNum) {
     }
     var noteNumObj = notesByNoteNum[noteNum];
     var currNextNote = noteNumObj.nextNote % noteNumObj.notes.length;
-    var start = noteNumObj.notes[currNextNote]['start'];
-    var dur = noteNumObj.notes[currNextNote]['dur'];
+
+    var thisNoteObj = noteNumObj.notes[currNextNote]
+    var start = thisNoteObj['start'];
+    var dur = thisNoteObj['dur'];
+    var id = thisNoteObj['id'];
     if(quantiseState == true) {
         dur = nearestMultiple(dur, minNoteLength)
     }
     var end = start + dur;
-    var returnArr = [noteNum, start, dur, end];
+    var returnArr = [id, noteNum, start, dur, end];
 
     noteNumObj.nextNote ++
 
     outlet(0, returnArr);
+
+    // noteIDStartPlaying(id); // sends message to ui (outlet 4) with a list of ids of notes that are currently playing
 }
 
 function playBySingleNote(noteNum) {
@@ -249,22 +258,55 @@ function playBySingleNote(noteNum) {
         return;
     }
     var noteNumObj = notesByNoteNum[noteNum];
-    var start = noteNumObj.notes[0]['start'];
-    var dur = noteNumObj.notes[0]['dur'];
+    var note = noteNumObj.notes[0];
+    var start = note.start;
+    var dur = note.dur;
     if(quantiseState == true) {
         dur = nearestMultiple(dur, minNoteLength)
     }
     var end = start + dur;
-    var returnArr = [noteNum, start, dur, end];
+    var id = note.id;
+    var returnArr = [id, noteNum, start, dur, end];
 
     outlet(0, returnArr);
 }
+
+function playingNotes() {
+    var playingNotes = arrayfromargs(arguments);
+    var noteIds = [];
+    for(var i=0; i<playingNotes.length; i++) {
+        var noteNum = playingNotes[i];
+        if(playMode === 0) {
+            var pc = noteNum%12;
+            var pcOb = notesByPitchClass[pc];
+            if(!pcOb) {
+                continue;
+            }
+            var notes = pcOb['notes'];
+            var nnCounter = pcOb['nextNote'];
+            var currentNoteIdx = Math.max(nnCounter-1, 0) % notes.length;
+            // post('\ncurrentNoteIdx is:' + currentNoteIdx + '\npcOb["notes"][currentNoteIdx] is ' + JSON.stringify(notesByPitchClass[pc]['notes'][currentNoteIdx]));
+            noteIds.push(pcOb['notes'][currentNoteIdx]['id']);
+        } else {
+            var nnOb = notesByNoteNum[noteNum];
+            if(!nnOb) {
+                continue;
+            }
+            var notes = nnOb['notes'];
+            var nnCounter = nnOb['nextNote'];
+            var currentNoteIdx = Math.max(nnCounter-1, 0) % notes.length;
+            // post('\ncurrentNoteIdx is:' + currentNoteIdx + '\nnOb["notes"][currentNoteIdx] is ' + JSON.stringify(notesByPitchClass[pc]['notes'][currentNoteIdx]));
+            noteIds.push(nnOb['notes'][currentNoteIdx]['id']);
+        }
+    }
+    outlet(3, 'currentlyPlayingNoteIDS', noteIds);
+}
+
 
 
 //=================== EXPORT AUDIO LOGIC ===================//
 
 function exportNotes() {
-    post('export notes function')
     resetNextNoteCounters();
 
     exportNextNote();
@@ -303,7 +345,7 @@ function exportNextNote() {
 
 function setMinNoteLength(noteLength) {
     minNoteLength = noteLength;
-    post('\nminNoteLength is now:', minNoteLength);
+    post('minNoteLength is now:', minNoteLength);
     // filter all notes with new min note length
     organiseAllNotes();
     saveState();
@@ -338,6 +380,11 @@ function setQuantise(quantState) {
     post('\nSetting quantise state to', newState);
     quantiseState = newState;
     saveState();
+}
+
+function changePlayMode(pMode) {
+    playMode = pMode;
+    post('\nplayMode changed to ' + playMode);
 }
 
 //=================== STATE SAVING AND RETRIEVAL ===================//
@@ -382,6 +429,12 @@ function recallState(stateStr) {
         post('\nCould not parse state. Error:', err)
     }
 }
+
+//=================== UI RELATED FUNCTIONS ===================//
+// function setUINoteStart(id) {
+//     post('\nnectarvore.js: sending note play message to ui with id:', id);
+//     outlet(3, 'setUINoteStart', id);
+// }
 
 //=================== UTILITY FUNCTIONS ===================//
 
@@ -438,8 +491,4 @@ function noteNumToNoteLetter (noteNum) {
 
     var pitchClass = noteNum % 12;
     return pitchClassToLetter[pitchClass];
-}
-
-function redrawUI() {
-    outlet(3, 'redraw');
 }
