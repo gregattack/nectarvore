@@ -370,26 +370,9 @@ function setMinNoteAcc(acc) {
 }
 
 function randomiseOrder() {
-    post('\nShuffling notesByNoteNum note order');
-    var noteNumKeys = Object.keys(notesByNoteNum)
-
-    for(var i=0; i<noteNumKeys.length; i++) {
-        var key = noteNumKeys[i];
-
-        if(notesByNoteNum[key]['notes']) {
-            notesByNoteNum[key]['notes'] = shuffle(notesByNoteNum[key]['notes']);
-        }
-    }
-
-    post('\nShuffling notesByPitchClass note order');
-    var pitchClassKeys = Object.keys(notesByPitchClass)
-
-    for(var i=0; i<pitchClassKeys.length; i++) {
-        var key = pitchClassKeys[i];
-        if(notesByPitchClass[key]['notes']) {
-            notesByPitchClass[key]['notes'] = shuffle(notesByPitchClass[key]['notes']);
-        }
-    }
+    post('\nShuffling note order');
+    allNotes = shuffle(allNotes);
+    organiseAllNotes();
     saveState();
 }
 
