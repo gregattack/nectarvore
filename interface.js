@@ -139,6 +139,7 @@ function storeNoteInfo(noteId, noteNum, noteStart, noteDur, notePassFail) {
     // post('\nstoreNoteInfo notePassFail: ' + notePassFail);
     var pc = noteNum%12;
     if(notePassFail === 1) {
+        post('\nnote passed tests. passing to interface2')
         outlet(1, 'pitchClassDetected', pc);
     }
 

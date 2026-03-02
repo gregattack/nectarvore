@@ -5,6 +5,7 @@ var allNotes = []; // [id, note#, start#, dur#], [id, note#, start#, dur#]] e.g.
 var notesByPitchClass = {}; // {"0": {nextNote: 0, notes: [{id: ##, start: 3748, dur: 500}, ...]}, "1": {nextNote: 0, notes: [{id: ##, start: 8394, dur: 348}, ...}]}
 var notesByNoteNum = {}; //{"62": {nextNote: 0, notes: [{id: ##, start: 4672, dur: 902}, ...}], "73": {nextNote: 0, notes: [{id: ##, start: 7483, dur: 203}, ...}]}
 var minNoteLength = 60;
+var minNoteAcc = 50; // Max allowable deviation of note frequency (in cents I thin?)
 var quantiseState = false; // true/false. Quantise the 'dur' (and therefore also 'end') value output when playing back a note. If true these values will be quantised to the minNoteLength value.
 var _noteID = 1; // This is the ID given to each note. It is incremented for each new note.
 var playMode = 0; // 0 = play by pitch class;; 1 = play by note;; 2 = play single note.
@@ -83,12 +84,13 @@ function resetNotesByPitchClassNextNoteCounter(noteNum) {
  * @param {number} start 
  * @param {number} dur 
  * @param {number} note 
+ * @param {number} acc pitch accuracy. 0 is perfectly accurate (close to fundamental freq). + or - is further away
  */
-function storeNoteInfo(note, start, dur) {
-    var noteArr = [_noteID, note, start, dur];
+function storeNoteInfo(note, start, dur, acc) {
+    var noteArr = [_noteID, note, start, dur, acc];
     _noteID++;
     allNotes.push(noteArr);
-    post('\nAdded note: ID:', noteArr[0], '- note:', noteArr[1], '- start:', noteArr[2], '- dur:', noteArr[3], 'to allNotes array. Array length now:', allNotes.length);
+    post('\nAdded note: ID:', noteArr[0], '- note:', noteArr[1], '- start:', noteArr[2], '- dur:', noteArr[3], '- acc:', noteArr[4], 'to allNotes array. Array length now:', allNotes.length);
 
     // If note passes tests, add it to noteByPitchClass and notesByNoteNum objects
     if(testSingleNote(noteArr)) {
@@ -141,12 +143,21 @@ function filterInvalidNotes(noteList) {
 // noteArr = [ID, start, dur, end]
 function testSingleNote(noteArr) {
     var dur = noteArr[3];
-    return noteOverMinLength(dur);
+    var acc = Math.abs(noteArr[4]);
+    if(!noteOverMinLength(dur) || !noteMeetsMinAccuracy(acc)) {
+        return false;
+    }
+    return true;
 }
 
 // Test whether the particular note is over the minimum length of a note.
 function noteOverMinLength (dur) {
     return dur >= minNoteLength;
+}
+
+// Test whether a note meets accuracy requirements (deviation from fundamental freq)
+function noteMeetsMinAccuracy(acc) {
+    return acc <= minNoteAcc;
 }
 
 function organiseNotesByNoteNum(noteList) {
@@ -351,27 +362,17 @@ function setMinNoteLength(noteLength) {
     saveState();
 }
 
+function setMinNoteAcc(acc) {
+    minNoteAcc = acc;
+    post('minNoteAcc is now:', minNoteAcc);
+    organiseAllNotes();
+    saveState();
+}
+
 function randomiseOrder() {
-    post('\nShuffling notesByNoteNum note order');
-    var noteNumKeys = Object.keys(notesByNoteNum)
-
-    for(var i=0; i<noteNumKeys.length; i++) {
-        var key = noteNumKeys[i];
-
-        if(notesByNoteNum[key]['notes']) {
-            notesByNoteNum[key]['notes'] = shuffle(notesByNoteNum[key]['notes']);
-        }
-    }
-
-    post('\nShuffling notesByPitchClass note order');
-    var pitchClassKeys = Object.keys(notesByPitchClass)
-
-    for(var i=0; i<pitchClassKeys.length; i++) {
-        var key = pitchClassKeys[i];
-        if(notesByPitchClass[key]['notes']) {
-            notesByPitchClass[key]['notes'] = shuffle(notesByPitchClass[key]['notes']);
-        }
-    }
+    post('\nShuffling note order');
+    allNotes = shuffle(allNotes);
+    organiseAllNotes();
     saveState();
 }
 
@@ -404,7 +405,8 @@ function saveState() {
         // notesByPitchClass: notesByPitchClass,
         // notesByNoteNum: notesByNoteNum,
         minNoteLength: minNoteLength,
-        quantiseState: quantiseState
+        quantiseState: quantiseState,
+        minNoteAcc: minNoteAcc
     }
 
     outlet(2, JSON.stringify(state))
@@ -423,6 +425,7 @@ function recallState(stateStr) {
         // notesByPitchClass = state.notesByPitchClass;
         // notesByNoteNum = state.notesByNoteNum;
         minNoteLength = state.minNoteLength;
+        minNoteAcc = state.minNoteAcc;
         quantiseState = state.quantiseState;
         organiseAllNotes();
     } catch(err) {
