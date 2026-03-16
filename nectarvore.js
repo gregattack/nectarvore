@@ -209,7 +209,24 @@ function organiseSingleNoteByPC(singleNoteArr) {
 
 // =================== PLAYBACK LOGIC ===================//
 
-function playNoteByPitchClass(noteNum) {
+function playNote(noteNum, firstPlay) {
+    if(firstPlay !== 1) {
+        firstPlay = 0;
+    }
+
+    if(playMode === 0) {
+        post('\nPlaying note by pitch class ' + noteNum , firstPlay)
+        playNoteByPitchClass(noteNum, firstPlay)
+    } else if(playMode === 1) {
+        post('\nPlaying note by note num ' + noteNum + firstPlay)
+        playNoteByNoteNum(noteNum, firstPlay)
+    } else {
+        post('\nPlaying note by single note ' + noteNum + firstPlay)
+        playBySingleNote(noteNum, firstPlay)
+    }
+}
+
+function playNoteByPitchClass(noteNum, firstPlay) {
     var pitchClass = noteNum % 12;
     if(!notesByPitchClass[pitchClass]) {
         post('NO NOTES WITH PITCH CLASS:', pitchClass, 'AVAILABLE TO PLAY');
@@ -228,7 +245,7 @@ function playNoteByPitchClass(noteNum) {
         // post('\nQuantise is set to true so changing dur from', oldDur, 'to', dur)
     }
     var end = start + dur;
-    var returnArr = [id, noteNum, start, dur, end];
+    var returnArr = [id, noteNum, start, dur, end, firstPlay];
 
     pitchClassObj.nextNote ++
 
@@ -238,7 +255,7 @@ function playNoteByPitchClass(noteNum) {
 }
 
 
-function playNoteByNoteNum(noteNum) {
+function playNoteByNoteNum(noteNum, firstPlay) {
     if(!notesByNoteNum[noteNum]) {
         post('NO NOTES WITH NOTE NUM:', noteNum, 'AVAILABLE TO PLAY');
         return;
@@ -254,7 +271,7 @@ function playNoteByNoteNum(noteNum) {
         dur = nearestMultiple(dur, minNoteLength)
     }
     var end = start + dur;
-    var returnArr = [id, noteNum, start, dur, end];
+    var returnArr = [id, noteNum, start, dur, end, firstPlay];
 
     noteNumObj.nextNote ++
 
@@ -263,7 +280,7 @@ function playNoteByNoteNum(noteNum) {
     // noteIDStartPlaying(id); // sends message to ui (outlet 4) with a list of ids of notes that are currently playing
 }
 
-function playBySingleNote(noteNum) {
+function playBySingleNote(noteNum, firstPlay) {
     if(!notesByNoteNum[noteNum]) {
         post('NO NOTES WITH NOTE NUM:', noteNum, 'AVAILABLE TO PLAY');
         return;
@@ -277,7 +294,7 @@ function playBySingleNote(noteNum) {
     }
     var end = start + dur;
     var id = note.id;
-    var returnArr = [id, noteNum, start, dur, end];
+    var returnArr = [id, noteNum, start, dur, end, firstPlay];
 
     outlet(0, returnArr);
 }
