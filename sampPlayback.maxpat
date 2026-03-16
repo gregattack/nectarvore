@@ -40,24 +40,13 @@
 		"assistshowspatchername" : 0,
 		"boxes" : [ 			{
 				"box" : 				{
-					"id" : "obj-34",
-					"maxclass" : "comment",
-					"numinlets" : 1,
-					"numoutlets" : 0,
-					"patching_rect" : [ 256.285714328289032, 121.5, 150.0, 20.0 ],
-					"text" : "check if firstPlay"
-				}
-
-			}
-, 			{
-				"box" : 				{
 					"id" : "obj-32",
 					"maxclass" : "newobj",
 					"numinlets" : 2,
-					"numoutlets" : 2,
-					"outlettype" : [ "", "" ],
-					"patching_rect" : [ 283.0, 170.5, 46.0, 22.0 ],
-					"text" : "route 1"
+					"numoutlets" : 1,
+					"outlettype" : [ "bang" ],
+					"patching_rect" : [ 157.0, 280.0, 41.0, 22.0 ],
+					"text" : "del 20"
 				}
 
 			}
@@ -65,11 +54,22 @@
 				"box" : 				{
 					"id" : "obj-28",
 					"maxclass" : "newobj",
-					"numinlets" : 2,
+					"numinlets" : 1,
 					"numoutlets" : 2,
-					"outlettype" : [ "", "" ],
-					"patching_rect" : [ 283.0, 143.5, 53.0, 22.0 ],
-					"text" : "list.nth 6"
+					"outlettype" : [ "bang", "bang" ],
+					"patching_rect" : [ 155.0, 213.0, 32.0, 22.0 ],
+					"text" : "t b b"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-34",
+					"maxclass" : "comment",
+					"numinlets" : 1,
+					"numoutlets" : 0,
+					"patching_rect" : [ 256.285714328289032, 121.5, 150.0, 20.0 ],
+					"text" : "check if firstPlay"
 				}
 
 			}
@@ -213,10 +213,10 @@
 					"id" : "obj-13",
 					"maxclass" : "newobj",
 					"numinlets" : 1,
-					"numoutlets" : 5,
-					"outlettype" : [ "", "", "", "bang", "" ],
-					"patching_rect" : [ 143.5, 82.0, 61.0, 22.0 ],
-					"text" : "t l l l b l"
+					"numoutlets" : 4,
+					"outlettype" : [ "", "", "", "bang" ],
+					"patching_rect" : [ 143.5, 82.0, 50.5, 22.0 ],
+					"text" : "t l l l b"
 				}
 
 			}
@@ -346,26 +346,26 @@
 , 							{
 								"box" : 								{
 									"id" : "obj-12",
-									"linecount" : 2,
+									"linecount" : 3,
 									"maxclass" : "message",
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
-									"patching_rect" : [ 591.0, 216.0, 32.0, 22.0 ],
-									"text" : "1024."
+									"patching_rect" : [ 591.0, 216.0, 24.0, 35.0 ],
+									"text" : "1756."
 								}
 
 							}
 , 							{
 								"box" : 								{
 									"id" : "obj-6",
-									"linecount" : 2,
+									"linecount" : 3,
 									"maxclass" : "message",
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
-									"patching_rect" : [ 341.0, 211.0, 32.0, 22.0 ],
-									"text" : "1025."
+									"patching_rect" : [ 341.0, 211.0, 24.0, 35.0 ],
+									"text" : "1272."
 								}
 
 							}
@@ -625,7 +625,7 @@
 									"maxclass" : "inlet",
 									"numinlets" : 0,
 									"numoutlets" : 1,
-									"outlettype" : [ "" ],
+									"outlettype" : [ "bang" ],
 									"patching_rect" : [ 302.0, 42.0, 30.0, 30.0 ]
 								}
 
@@ -792,7 +792,7 @@
 									"numoutlets" : 2,
 									"outlettype" : [ "", "bang" ],
 									"patching_rect" : [ 407.0, 355.0, 47.0, 22.0 ],
-									"text" : "line 0 5"
+									"text" : "line 0 1"
 								}
 
 							}
@@ -1443,7 +1443,7 @@
 									"maxclass" : "inlet",
 									"numinlets" : 0,
 									"numoutlets" : 1,
-									"outlettype" : [ "" ],
+									"outlettype" : [ "bang" ],
 									"patching_rect" : [ 475.0, 33.0, 30.0, 30.0 ]
 								}
 
@@ -2467,7 +2467,7 @@
 									"maxclass" : "inlet",
 									"numinlets" : 0,
 									"numoutlets" : 1,
-									"outlettype" : [ "" ],
+									"outlettype" : [ "bang" ],
 									"patching_rect" : [ 475.0, 33.0, 30.0, 30.0 ]
 								}
 
@@ -3190,7 +3190,7 @@
 					"numinlets" : 1,
 					"numoutlets" : 0,
 					"patching_rect" : [ 2.0, 137.0, 151.0, 141.0 ],
-					"text" : "0. If first play then stop both players\n1. choose A or B track\n2. figure out and set crossover time. Figure out and set end of note delay bang. Update current note id\n3. Start A/R envelope\n4. start sample playback"
+					"text" : "1. choose A or B track\n2. figure out and set crossover time. Figure out and set end of note delay bang. Update current note id\n3. if first play then stop all tracks and start A/R envelope\n4. start sample playback"
 				}
 
 			}
@@ -3547,13 +3547,6 @@
 			}
 , 			{
 				"patchline" : 				{
-					"destination" : [ "obj-28", 0 ],
-					"source" : [ "obj-13", 4 ]
-				}
-
-			}
-, 			{
-				"patchline" : 				{
 					"destination" : [ "obj-82", 1 ],
 					"source" : [ "obj-13", 0 ]
 				}
@@ -3638,8 +3631,24 @@
 			}
 , 			{
 				"patchline" : 				{
+					"destination" : [ "obj-23", 2 ],
+					"order" : 0,
+					"source" : [ "obj-28", 1 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
 					"destination" : [ "obj-32", 0 ],
 					"source" : [ "obj-28", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-7", 2 ],
+					"order" : 1,
+					"source" : [ "obj-28", 1 ]
 				}
 
 			}
@@ -3661,23 +3670,14 @@
 			}
 , 			{
 				"patchline" : 				{
-					"destination" : [ "obj-115", 0 ],
+					"destination" : [ "obj-28", 0 ],
 					"source" : [ "obj-31", 0 ]
 				}
 
 			}
 , 			{
 				"patchline" : 				{
-					"destination" : [ "obj-23", 2 ],
-					"order" : 0,
-					"source" : [ "obj-32", 0 ]
-				}
-
-			}
-, 			{
-				"patchline" : 				{
-					"destination" : [ "obj-7", 2 ],
-					"order" : 1,
+					"destination" : [ "obj-115", 0 ],
 					"source" : [ "obj-32", 0 ]
 				}
 
