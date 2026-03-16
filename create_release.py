@@ -1,7 +1,7 @@
 import os
 import zipfile
 
-def create_zip(file_list, output_zip):
+def create_zip(file_list):
     """
     Compress a list of files into a zip archive.
     
@@ -9,7 +9,8 @@ def create_zip(file_list, output_zip):
         file_list: List of file paths to compress
         output_zip: Name of the output zip file
     """
-    with zipfile.ZipFile(output_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
+    output_zip = input("What is the name of this release? ") + '.zip';
+    with zipfile.ZipFile('releases/' + output_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for file_path in file_list:
             if os.path.exists(file_path):
                 # Add file to zip, using just the filename (not full path)
@@ -34,4 +35,4 @@ files_to_compress = [
     'sampPlayback.maxpat'
 ]
 
-create_zip(files_to_compress, 'nectarvore_v0.4.0.zip')
+create_zip(files_to_compress)
