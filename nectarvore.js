@@ -215,7 +215,7 @@ function playNote(noteNum, firstPlay) {
     }
 
     if(playMode === 0) {
-        post('\nPlaying note by pitch class ' + noteNum + firstPlay)
+        post('\nPlaying note by pitch class ' + noteNum , firstPlay)
         playNoteByPitchClass(noteNum, firstPlay)
     } else if(playMode === 1) {
         post('\nPlaying note by note num ' + noteNum + firstPlay)
