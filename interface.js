@@ -163,9 +163,9 @@ function storeNoteInfo(noteId, noteNum, noteStart, noteDur, notePassFail) {
  */
 function currentlyPlayingNoteIDS() {
     var ids = arrayfromargs(arguments)
-    if(ids.length) {
-        post('\ncurrentlyPlayingNoteIDS received ids: ' + ids)
-    }
+    // if(ids.length) {
+    //     post('\ncurrentlyPlayingNoteIDS received ids: ' + ids)
+    // }
 
     var playingNotes = [];
     for(var i=0; i<ids.length; i++) {
